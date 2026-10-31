@@ -42,7 +42,7 @@ img{display:block}
 /* ===== 标题页 ===== */
 #scr-title{align-items:center;justify-content:center;gap:14px;padding:24px}
 #scr-title .art{position:absolute;top:20px;right:-95px;width:240px;opacity:.13;transform:rotate(10deg);pointer-events:none;-webkit-mask-image:linear-gradient(180deg,#000 55%,transparent 95%);mask-image:linear-gradient(180deg,#000 55%,transparent 95%)}
-#scr-title .logo{font-size:38px;letter-spacing:.14em;color:var(--goldhi);text-shadow:0 4px 24px rgba(217,164,65,.4);text-align:center;line-height:1.3}
+#scr-title .logo{font-family:"Kaiti SC","STKaiti","KaiTi",serif;font-weight:900;font-size:clamp(35px,10vw,48px);letter-spacing:.14em;color:var(--goldhi);text-shadow:1px 2px 0 #61371a,2px 4px 0 #2a170d,0 7px 24px rgba(217,164,65,.4);text-align:center;line-height:1.3}
 #scr-title .sub{font-size:13px;letter-spacing:.3em;color:var(--dim);text-align:center}
 #scr-title .menu{display:flex;flex-direction:column;gap:11px;width:min(280px,84%);margin-top:18px}
 #scr-title .menu .btn{padding:13px 0;font-size:15px}
@@ -215,10 +215,12 @@ img{display:block}
 .vs-ready.on{color:#9fd8a2;border-color:rgba(123,196,127,.55)}
 .vs-act{flex:none;font-size:10px;padding:4px 10px;border-radius:8px}
 .vs-cards{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
-.vs-card{width:52px;text-align:center}
+.vs-card{width:60px;text-align:center}
 .vs-card img{width:100%;border-radius:7px;border:1.5px solid rgba(200,181,141,.35);aspect-ratio:2/3;object-fit:cover;object-position:50% 12%}
-.vs-card small{display:block;font-size:8.5px;color:var(--dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vs-card.pick{border-color:var(--gold)}.vs-card.picked img{border-color:var(--gold);box-shadow:0 0 8px rgba(244,217,139,.5)}
+.vs-card small{display:block;font-size:10px;line-height:1.35;color:var(--dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vs-pickedbar{position:sticky;top:0;z-index:3;margin:0 0 8px;padding:7px 9px;border:1px solid #8a7147;border-radius:9px;background:#241b11f5;color:#ead9b7;font-size:11px;line-height:1.5}.vs-pickedbar b{color:#ffe09a}.vs-card:focus-visible{outline:3px solid #ffe09a;outline-offset:2px}.vs-card.pick{border-color:var(--gold)}.vs-card.picked img{border-color:var(--gold);box-shadow:0 0 8px rgba(244,217,139,.5)}
+.v3-actor .dcard{animation:v3Attack .55s ease-out}.v3-hit .dcard{animation:v3Hit .55s ease-out}@keyframes v3Attack{40%{transform:translateY(-14px) scale(1.08);filter:brightness(1.5)}}@keyframes v3Hit{35%{transform:translateX(8px) rotate(4deg);filter:brightness(2)}65%{transform:translateX(-6px) rotate(-3deg)}}
+@media(prefers-reduced-motion:reduce){.v3-actor .dcard,.v3-hit .dcard{animation:none}}
 .vs-input{display:flex;gap:8px;margin:10px 0}
 .vs-input input{flex:1;background:rgba(0,0,0,.4);border:1px solid rgba(217,164,65,.4);border-radius:11px;color:var(--goldhi);font-size:22px;letter-spacing:.3em;text-align:center;padding:10px 0;font-variant-numeric:tabular-nums;outline:none}
 .netnote{font-size:10px;color:var(--dim);line-height:1.8}
@@ -384,10 +386,10 @@ img{display:block}
 .burst-button:disabled{cursor:default;opacity:.65}.burst-button.ready{border-color:#ffd886;box-shadow:0 0 14px #f3bb4a40;animation:burstReady 1.6s infinite}.burst-button.activated{border-color:#6d8a66;background:#24332544}
 @keyframes burstReady{50%{box-shadow:0 0 24px #f3bb4a70}}
 .skill-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.skill-card{display:flex;align-items:flex-start;gap:7px;text-align:left;border:1px solid #80704e70;border-radius:11px;padding:8px;background:linear-gradient(145deg,#30251c,#1c1711);min-width:0;touch-action:none;user-select:none;-webkit-user-select:none}
+.skill-card{display:flex;align-items:flex-start;gap:7px;text-align:left;border:1px solid #80704e70;border-radius:11px;padding:8px;background:linear-gradient(145deg,#30251c,#1c1711);min-width:0;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 .skill-icon{display:flex;align-items:center;justify-content:center;flex:none;width:27px;height:30px;border:1px solid var(--flow);color:var(--flow);background:#0005;border-radius:7px;font-size:20px}
-.skill-info{min-width:0;display:flex;flex-direction:column;gap:2px}.skill-info b{font-size:11px;line-height:1.5;color:#f7e8c9;overflow-wrap:anywhere}
-.skill-type{color:var(--flow);font-size:9px}.skill-desc{font-size:9px;line-height:1.5;color:#baab94}.skill-cost{font-size:9px;color:#acd3ff;line-height:1.5}
+.skill-info{min-width:0;display:flex;flex-direction:column;gap:2px}.skill-info b{font-size:12px;line-height:1.5;color:#f7e8c9;overflow-wrap:anywhere}
+.skill-type{color:var(--flow);font-size:10px}.skill-desc{font-size:10px;line-height:1.5;color:#baab94}.skill-cost{font-size:10.5px;color:#acd3ff;line-height:1.5}
 .skill-card:disabled{opacity:.66;cursor:not-allowed}.skill-card.sealed{background:#181715;border-color:#44413b;opacity:.6}.skill-card.sealed .skill-icon{color:#777;border-color:#555}.skill-card.sealed .skill-type{color:#979085}.skill-card.sealed .skill-info b{color:#b4afa4}
 .skill-card.ultimate{grid-column:1/-1;border-color:#ad8c4f;background:linear-gradient(110deg,#4a2d24,#292116)}.skill-card.ultimate .skill-icon{font-size:27px;width:38px;height:38px;color:#ffdc91}.skill-card.ultimate.sealed{background:#201c18;border-color:#655c4e}
 .skill-card.eff-super:not(.sealed){border-color:#c7a45d}.skill-card.dragging{opacity:.3}
@@ -414,6 +416,46 @@ img{display:block}
 @media(max-height:780px){#scr-battle{overflow-y:auto;overflow-x:hidden}.bt-arena{flex:none;height:270px;min-height:270px}.bt-menu{flex:none}.mon.enemy .m-sprite{width:83px}.mon.player .m-sprite{width:94px}.mon.enemy{top:53px}.mon.player{bottom:5px}.m-card{padding:6px 7px;min-width:118px;max-width:138px}.m-card.expanded-hp{min-width:138px;max-width:150px}.bt-hud{top:5px}.bt-log{height:72px}.bt-menu{padding-bottom:8px;gap:5px}.skill-card{padding:6px;gap:5px}.skill-desc{display:none}.skill-icon{width:23px!important;height:26px!important;font-size:17px!important}.skill-grid{gap:5px}.burst-button{padding:6px 8px}.log-heading{font-size:9px}}
 @media(max-width:360px){.m-card{min-width:104px;max-width:118px}.m-card.expanded-hp{min-width:122px;max-width:130px}.skill-card{gap:4px}.skill-icon{width:21px!important}.skill-info b{font-size:10px}.bt-hud .vn{max-width:110px}}
 @media(prefers-reduced-motion:reduce){.burst-shake,.ultimate-cast,.ultimate-impact,.burst-ring,.burst-shard,.hp-surge,.unlock-card.lit{animation:none}.burst-flash{display:none}.burst-title{animation:none}.burst-button.ready{animation:none}}
+/* 对战表演：双方卡牌保留足够空间，特效只覆盖场地 */
+.bt-arena{isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 50% 52%,#9c673224,transparent 55%)}
+.bt-arena:after{content:"";position:absolute;left:12%;right:12%;top:50%;height:1px;background:linear-gradient(90deg,transparent,#d8aa6866,transparent);pointer-events:none}
+.duel-row{z-index:2}.dslot{position:relative;overflow:visible}.dslot .dcard{position:relative;z-index:2;will-change:transform,filter}
+.duel-foes,.duel-mine{justify-content:center}.dslot:only-child{flex:0 1 250px}
+.duel-foes .dslot:only-child .dcard,.duel-mine .dslot:only-child .dcard{width:clamp(54px,15vw,80px)}
+.battle-fx-layer{position:absolute;inset:0;z-index:6;pointer-events:none;overflow:hidden}
+.battle-fx-name{position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);max-width:90%;white-space:nowrap;color:#fff4d2;font-weight:800;font-size:clamp(14px,4vw,20px);text-shadow:0 2px 5px #000,0 0 14px var(--fx-color);animation:fxName .65s both}
+.battle-projectile{position:absolute;left:var(--sx);top:var(--sy);width:22px;height:22px;border-radius:50%;background:#fff6d0;box-shadow:0 0 9px 5px var(--fx-color),0 0 28px 10px var(--fx-color);animation:fxTravel .36s ease-in both}
+.battle-impact{position:absolute;left:var(--tx);top:var(--ty);width:40px;height:40px;border:3px solid var(--fx-color);border-radius:50%;box-shadow:0 0 18px var(--fx-color),inset 0 0 14px var(--fx-color);animation:fxImpact .36s .28s both}
+.battle-fx-number{position:absolute;left:var(--tx);top:var(--ty);font-size:24px;font-weight:900;color:#ffe4a8;text-shadow:0 2px 5px #000,0 0 12px var(--fx-color);white-space:nowrap;animation:fxNumber .55s .3s both}
+@keyframes fxTravel{from{transform:translate(-50%,-50%) scale(.4);opacity:0}20%{opacity:1}to{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.25);opacity:1}}
+@keyframes fxImpact{from{transform:translate(-50%,-50%) scale(.2);opacity:1}to{transform:translate(-50%,-50%) scale(2.4);opacity:0}}
+@keyframes fxName{0%,100%{opacity:0}20%,75%{opacity:1}}
+@keyframes fxNumber{from{transform:translate(-50%,-10%);opacity:0}25%{opacity:1}to{transform:translate(-50%,-100%);opacity:0}}
+@media(max-height:780px){.bt-arena{height:280px;min-height:280px}.duel-foes{top:48px}.duel-mine{bottom:8px}}
+@media(prefers-reduced-motion:reduce){.battle-projectile,.battle-impact{animation:none;display:none}.battle-fx-name,.battle-fx-number{animation:none;opacity:1}}
+@media(min-width:850px){
+  body.battle-layout #app{width:min(1000px,calc(100vw - 24px))}
+  body.battle-layout #scr-battle.on{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,380px);overflow:hidden}
+  body.battle-layout .bt-arena{height:100%;min-height:0}
+  body.battle-layout .bt-menu{height:100%;overflow-y:auto;padding:16px;justify-content:center}
+  body.battle-layout .duel-foes{top:65px}body.battle-layout .duel-mine{bottom:28px}
+  body.battle-layout .dslot .dcard{width:clamp(65px,8vw,95px)}
+  body.battle-layout .dslot:only-child{flex-basis:350px}
+  body.battle-layout .dslot .dname{font-size:14px}body.battle-layout .dslot .dsub{font-size:12px}body.battle-layout .dslot .downer{font-size:11px}
+  body.battle-layout .skill-info b{font-size:13px}body.battle-layout .skill-desc,body.battle-layout .skill-cost,body.battle-layout .skill-availability{font-size:11px}
+  body.battle-layout .choice-panel,body.battle-layout .bt-log{font-size:12px}
+}
+select{max-width:100%;color:var(--paper);background:#2a2015;border:1px solid #806843;border-radius:7px;padding:5px;font:inherit}
+/* 选招和目标反馈：文字、颜色及键盘焦点共同表达状态 */
+.skill-card:not(:disabled){border-color:#bda56d}
+.skill-card.selected-skill{border-color:#ffe09a;box-shadow:0 0 0 2px #d9a441,0 0 18px #d9a44155;background:linear-gradient(145deg,#594024,#261c12)}
+.skill-card:focus-visible,.dslot[role="button"]:focus-visible,.choice-confirm:focus-visible{outline:3px solid #fff0b9;outline-offset:2px}
+.skill-availability{font-size:10px;color:#a9dba9}.skill-card.selected-skill .skill-availability{color:#ffe09a}.skill-card:disabled .skill-availability{color:#b5a398}
+.dslot.target-available{cursor:pointer;border-color:#9cc5d5;box-shadow:0 0 0 1px #9cc5d566}.dslot.target-selected{border-color:#ffe09a;box-shadow:0 0 0 2px #f5ce76,0 0 18px #f5ce7655}
+.target-label{font-size:9px;color:#b9e8f4}.target-selected .target-label{color:#ffe09a}.m-sprite.target-selected{border-color:#ffe09a;box-shadow:0 0 0 3px #f5ce76,0 0 22px #f5ce7680}
+.choice-panel{border:1px solid #826d46;border-radius:10px;padding:8px 10px;background:#211a13;color:#dfd0ae;font-size:11px;line-height:1.6}
+.choice-panel b{color:#ffe09a}.choice-actions{display:flex;gap:8px;margin-top:6px}.choice-confirm{flex:1}.choice-confirm:disabled{opacity:.45;cursor:not-allowed}
+.guide-choice{padding:14px;line-height:1.8;color:#d7c7a6}.guide-choice .btn{width:100%;margin-top:10px}
 </style>
 </head>
 <body>
@@ -423,10 +465,11 @@ img{display:block}
   <section class="scr on" id="scr-title">
     <img class="art" src="cards/001.jpg" alt="">
     <div class="logo serif">浪浪山<br>妖怪合伙人</div>
-    <div class="sub">v2.7 · 云端联机 · 神魔妖鬼</div>
+    <div class="sub">山岭 · 水府 · 炎荒 · 幽洞</div>
     <div class="menu">
       <button class="btn btn-gold" id="bt-new">开始新的冒险</button>
       <button class="btn btn-red" id="bt-continue" style="display:none">继续冒险</button>
+      <button class="btn btn-ghost" id="bt-resume-arena" style="display:none">继续未结束的对战</button>
       <button class="btn btn-ghost" id="bt-help1">🎓 玩法指南 · 边玩边学</button>
     </div>
     <div class="tip">进度自动保存在本机浏览器 · 下次打开可继续</div>
@@ -446,7 +489,6 @@ img{display:block}
       <button data-tab="map" class="on"><span>⛰️</span>巡山</button>
       <button data-tab="team"><span>🐵</span>队伍</button>
       <button data-tab="dex"><span>📖</span>名册</button>
-      <button data-tab="gacha"><span>🎴</span>抽卡</button>
       <button data-tab="vs"><span>⚔️</span>对战</button>
       <button data-tab="shop"><span>🏪</span>商店</button>
     </nav>
@@ -467,6 +509,14 @@ img{display:block}
   <div class="ovl" id="ovl-pick">
     <div class="ovl-head"><div class="t serif" id="pick-title">选择</div><button class="x" data-x="ovl-pick">✕</button></div>
     <div class="ovl-body" id="pick-body"></div>
+  </div>
+  <div class="ovl" id="ovl-tut-choice" role="dialog" aria-modal="true" aria-labelledby="tut-choice-title">
+    <div class="ovl-head"><div class="t serif" id="tut-choice-title">准备出发</div></div>
+    <div class="ovl-body guide-choice"><p>你的三位搭档已经准备好了。可以先通过一场入门试炼熟悉战斗和收服，也可以直接开始巡山。</p>
+      <button class="btn btn-gold" id="start-tutorial">🎓 开始新手引导</button>
+      <button class="btn btn-ghost" id="skip-tutorial">直接巡山 · 跳过引导</button>
+      <p class="dimtx" style="font-size:11px;margin-top:12px">之后可以随时在「玩法指南」中重新开始引导。</p>
+    </div>
   </div>
   <!-- 帮助 -->
   <div class="ovl" id="ovl-help">
@@ -493,6 +543,8 @@ img{display:block}
 </div>
 
 <script src="wb-cloud.js"></script>
+<script src="game-rules-v3.js"></script>
+<script src="game-save-v3.js"></script>
 <script>
 "use strict";
 /* =====================================================
@@ -642,25 +694,18 @@ function movesOf(card){
 /* 数值 */
 const statMul=lvl=>0.6+lvl*0.04;
 function statsOf(card,lvl){
-  const m=statMul(lvl),r=card.role;
-  const defMul=r==="防御"?1.15:(r==="输出"?0.95:1);
-  const spdBase=r==="输出"?9:(r==="防御"?12:10);
-  return {
-    hp:Math.round(card.power/10*m),
-    atk:Math.round(card.power/13*m),
-    def:Math.round(card.power/14*defMul*m),
-    spd:Math.round(card.power/spdBase*m)
-  };
+  return LanglangRules.stats(card,lvl);
 }
 const expNeed=lvl=>20+lvl*12;
+const monStats=m=>m.competitive?LanglangRules.stats(byNum(m.num),30):statsOf(byNum(m.num),m.lvl);
 
 let _id=1;
 function mkMon(num,lvl){
   const card=byNum(num);
   const st=statsOf(card,lvl);
-  return {id:_id++,num,lvl,exp:0,hp:st.hp,pp:movesOf(card).map(m=>m.pp)};
+  return {id:_id++,num,lvl,exp:0,hp:st.hp,selectedSkills:[0,1,2,3],skillPP:LanglangRules.skillPool(card).map(x=>x.pp),pp:movesOf(card).map(m=>m.pp)};
 }
-function healMon(m){const st=statsOf(byNum(m.num),m.lvl);m.hp=st.hp;m.pp=movesOf(byNum(m.num)).map(x=>x.pp);}
+function healMon(m){const card=byNum(m.num),st=statsOf(card,m.lvl);m.hp=st.hp;m.pp=movesOf(card).map(x=>x.pp);m.skillPP=LanglangRules.skillPool(card).map(x=>x.pp);}
 
 /* ---------- 关卡 ---------- */
 const CHAPTERS=["第一章 · 浪浪山大王洞（新手村）","第二章 · 黑风山森林","第三章 · 平顶山莲花洞","第四章 · 狮驼岭集团总部","第五章 · 灵山大雷音寺"];
@@ -678,24 +723,30 @@ const STAGES=[
  {id:10,ch:4,name:"心魔之战",ds:"击败它，就能离开浪浪山",wild:false,foes:[["004",32],["002",30],["008",30]],reward:1500,drop:"005"}
 ];
 const ITEMS={
-  gourd:{name:"紫金红葫芦",icon:"🏺",ds:"收服野生妖怪。对方体力越低、稀有度越低，越容易成功。战斗中使用。",price:300},
-  pie:{name:"疗伤烧饼",icon:"🥮",ds:"恢复场上妖怪 50% 体力。战斗中使用。",price:200},
-  puddin:{name:"元气布丁",icon:"🍮",ds:"复活一只失去战斗能力的妖怪（恢复一半体力）。",price:500}
+  gourd:{name:"收妖葫芦",icon:"🏺",ds:"收服野生妖怪。对方体力越低，越容易成功。",price:120},
+  pie:{name:"疗伤烧饼",icon:"🥮",ds:"恢复一只妖怪 30% 体力。",price:80},
+  cleanse:{name:"清心草",icon:"🌿",ds:"战斗中解除场上妖怪的异常状态。",price:60},
+  puddin:{name:"还魂丹",icon:"🍡",ds:"在妖怪档案中复活一只倒下的妖怪，恢复一半体力。",price:150},
+  ppFruit:{name:"回灵果",icon:"🍑",ds:"在妖怪档案中为选择的技能恢复 5 点 PP。",price:80}
 };
 
 /* ---------- 游戏状态 ---------- */
 let G=null;
 function newGame(){
-  G={coin:500,items:{gourd:3,pie:3,puddin:1},roster:[],team:[],cleared:[],done:false,tut:false,skillsVersion:24,pity:0,lastDraws:[]};
+  G={version:3,coin:500,items:{gourd:3,pie:3,puddin:1,cleanse:1,ppFruit:1,expFruit:0},roster:[],team:[],cleared:[],done:false,tut:false,skillsVersion:24,pity:0,lastDraws:[]};
 }
 function save(){try{
   const snapshot={...G,roster:G.roster.map(m=>({...m,hp:Math.min(m.hp,statsOf(byNum(m.num),m.lvl).hp)}))};
-  localStorage.setItem("lls_save_v2",JSON.stringify(snapshot));
+  LanglangSave.save(localStorage,snapshot);
 }catch(e){}}
-function load(){try{const s=localStorage.getItem("lls_save_v2");if(!s)return null;const g=JSON.parse(s);if(!g||!g.roster)return null;
+function load(){try{const g=LanglangSave.load(localStorage,CARDS);if(!g||!g.roster)return null;
+  g.items=g.items||{};for(const k of ['gourd','pie','puddin','cleanse','ppFruit','expFruit'])g.items[k]=Number.isInteger(g.items[k])?Math.max(0,g.items[k]):0;
   if(g.skillsVersion!==24){g.roster.forEach(healMon);g.skillsVersion=24;}
   g.roster.forEach(m=>{
     const max=statsOf(byNum(m.num),m.lvl).hp,moves=movesOf(byNum(m.num));
+    if(!Array.isArray(m.selectedSkills))m.selectedSkills=[0,1,2,3];
+    const pool=LanglangRules.skillPool(byNum(m.num)),oldSkillPP=Array.isArray(m.skillPP)?m.skillPP:[];
+    m.skillPP=pool.map((skill,i)=>Number.isFinite(oldSkillPP[i])?Math.max(0,Math.min(skill.pp,oldSkillPP[i])):skill.pp);
     m.hp=Math.max(0,Math.min(Number.isFinite(m.hp)?m.hp:max,max));
     const pp=Array.isArray(m.pp)?m.pp:[];
     m.pp=moves.map((mv,i)=>Number.isFinite(pp[i])?Math.max(0,Math.min(mv.pp,pp[i])):mv.pp);
@@ -709,11 +760,12 @@ const aliveTeam=()=>G.team.map(monOf).filter(m=>m&&m.hp>0);
 /* ---------- UI 工具 ---------- */
 const $=s=>document.querySelector(s);
 const $$=s=>Array.from(document.querySelectorAll(s));
-function scr(name){$$(".scr").forEach(s=>s.classList.remove("on"));$("#scr-"+name).classList.add("on");}
+function scr(name){$$(".scr").forEach(s=>s.classList.remove("on"));$("#scr-"+name).classList.add("on");document.body.classList.toggle('battle-layout',name==='battle');}
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("on");clearTimeout(t._tm);t._tm=setTimeout(()=>t.classList.remove("on"),1800);}
 function ovl(id,on){$("#"+id).classList.toggle("on",on);}
 const flowChip=f=>`<span class="flowchip" style="background:${FLOW[f].c}">${FLOW[f].name}</span>`;
 const idnChip=i=>`<span class="flowchip" style="background:${IDENT[i].c}">${IDENT[i].name}</span>`;
+const typeChip=c=>{const type=LanglangRules.typeOf(c),colors={mountain:'#718d4b',water:'#398eb8',fire:'#bc6140',cave:'#8173a6'};return `<span class="flowchip" style="background:${colors[type]}">${LanglangRules.TYPES[type]}</span>`;};
 const hpBarCls=(h,max)=>h<=0?"low":(h/max<=0.25?"low":(h/max<=0.55?"mid":""));
 const hpColor=(h,max)=>h/max<=0.25?"linear-gradient(90deg,#e05545,#a33428)":(h/max<=0.55?"linear-gradient(90deg,#e8c36a,#c9922f)":"linear-gradient(90deg,#7bc47f,#4e9e57)");
 
@@ -726,19 +778,25 @@ $("#ovl-wheel").addEventListener("click",e=>{if(e.target.id==="ovl-wheel")closeW
 $$("[data-x]").forEach(b=>b.addEventListener("click",()=>ovl(b.dataset.x,false)));
 
 /* 御妖师入职：新人三连抽（首抽必出 SR+） */
-function openStarter(){
-  const nums=[drawCard("SR+"),drawCard(null),drawCard(null)];
+function openStarter(forceTutorial=false){
+  const nums=[];nums.push(drawCard("SR+",nums));nums.push(drawCard(null,nums));nums.push(drawCard(null,nums));
   (G.lastDraws=[]).unshift(...nums);
   toast("欢迎来到浪浪山！新人三连抽——");
   gachaReveal(nums,()=>{
-    G.roster=nums.map(n=>mkMon(n,6));
+    const initialLevel={R:5,R2:6,S:7,U:8};
+    G.roster=nums.map(n=>mkMon(n,initialLevel[byNum(n).rar]||6));
     G.team=G.roster.map(m=>m.id);
     _id=G.roster.reduce((a,b)=>Math.max(a,b.id),0)+1;
     save();
-    toast("三位搭档自动编入队伍，试炼马上开始！");
-    if(!G.tut)tutStart();else enterHub();
+    enterHub();
+    if(forceTutorial)tutStart();
+    else if(!G.tut){ovl("ovl-tut-choice",true);$("#start-tutorial").focus();}
+    else toast("三位搭档已编入队伍！");
   });
 }
+
+$("#start-tutorial").addEventListener("click",()=>{ovl("ovl-tut-choice",false);tutStart();});
+$("#skip-tutorial").addEventListener("click",()=>{ovl("ovl-tut-choice",false);G.tut=true;save();tab="map";enterHub();toast("已跳过引导，可随时在玩法指南中重开");});
 
 /* ---------- 主城 ---------- */
 let tab="map";
@@ -761,6 +819,7 @@ function renderHub(){
 function renderMap(body){
   const doneAll=G.cleared.length>=STAGES.length;
   let h=`<div class="dimtx" style="font-size:11px;line-height:1.8;margin:2px 2px 6px">击败山头妖怪获得山核桃与卡牌；野生妖怪可以用葫芦<b style="color:var(--gold)">收服</b>。${doneAll?"<br><b style='color:var(--goldhi)'>🎉 已通关全山头——真结局达成：在人间开起了文创烧烤摊！</b>":""}</div>`;
+  h+=`<div class="chap-label serif">地界巡山 · 探索收服</div><div class="panel"><div class="dimtx" style="font-size:11px;line-height:1.7;margin-bottom:8px">选择地界，寻找野生妖怪；推进山头后可能遇到更多妖怪。</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">${Object.entries(LanglangRules.TYPES).map(([key,name])=>`<button class="btn btn-ghost" data-patrol="${key}">${name}巡山</button>`).join("")}</div></div>`;
   let curCh=-1;
   STAGES.forEach((st,i)=>{
     const unlocked=i===0||G.cleared.includes(STAGES[i-1].id);
@@ -779,12 +838,14 @@ function renderMap(body){
     </div>`;
   });
   body.innerHTML=h;
+  $$("#hub-body [data-patrol]").forEach(b=>b.addEventListener("click",()=>startPatrol(b.dataset.patrol)));
   $$("#hub-body [data-stage]").forEach(b=>b.addEventListener("click",()=>startBattle(+b.dataset.stage)));
 }
 
 /* --- 队伍 --- */
 function renderTeam(body){
-  let h=`<div class="dimtx" style="font-size:11px;line-height:1.8;margin:2px 2px 8px">出战队伍最多 3 只。妖怪在每场战斗后会自动回满状态（浪浪山疗养院包月）。</div>`;
+  const needsRest=G.roster.some(m=>m.hp<statsOf(byNum(m.num),m.lvl).hp||LanglangRules.skillPool(byNum(m.num)).some((s,i)=>(m.skillPP?.[i]??s.pp)<s.pp));
+  let h=`<div class="dimtx" style="font-size:11px;line-height:1.8;margin:2px 2px 8px">出战队伍最多 3 只。经验果 ${G.items.expFruit||0} 个，可在妖怪档案中使用。</div><button class="btn btn-ghost" id="team-rest" style="margin-bottom:10px" ${needsRest?'':'disabled'}>${needsRest?'全队休整 · 🌰 50':'全队状态已满'}</button>`;
   for(let i=0;i<3;i++){
     const m=i<G.team.length?monOf(G.team[i]):null;
     if(m){
@@ -792,7 +853,7 @@ function renderTeam(body){
       h+=`<div class="slot filled">
         <div class="pic" data-detail="${m.id}"><img src="cards/${m.num}.jpg" alt=""></div>
         <div class="inf">
-          <div class="nm">${c.name} <span class="lv">Lv.${m.lvl}</span> ${flowChip(c.fac)}</div>
+          <div class="nm">${c.name} <span class="lv">Lv.${m.lvl}</span> ${typeChip(c)}</div>
           <div class="bars">
             <div class="bar hp ${hpBarCls(m.hp,st.hp)}"><i style="width:${Math.max(0,m.hp/st.hp*100)}%"></i></div>
             <div class="bar xp"><i style="width:${Math.min(100,m.exp/need*100)}%"></i></div>
@@ -815,12 +876,16 @@ function renderTeam(body){
   h+=`</div>`;
   if(!G.roster.length)h+=`<div class="dimtx" style="text-align:center;padding:18px 0">名册还是空的</div>`;
   body.innerHTML=h;
+  $('#team-rest').addEventListener('click',()=>{if(G.coin<50){toast('山核桃不足');return;}G.coin-=50;G.roster.forEach(healMon);save();renderHub();toast('妖怪体力和技能 PP 已恢复');});
   $$("#hub-body [data-detail]").forEach(b=>b.addEventListener("click",()=>renderDetail(+b.dataset.detail)));
   $$("#hub-body [data-out]").forEach(b=>b.addEventListener("click",()=>{
     G.team=G.team.filter(id=>id!==+b.dataset.out);save();renderHub();}));
   $$("#hub-body [data-in]").forEach(b=>b.addEventListener("click",()=>{
     if(G.team.length>=3){toast("队伍已满，请先撤下一位");return;}
-    G.team.push(+b.dataset.in);save();renderHub();toast("已编入队伍");}));
+    const incoming=monOf(+b.dataset.in);
+    if(!incoming)return;
+    if(G.team.some(id=>{const m=monOf(id);return m&&m.num===incoming.num;})){toast("同一队伍不能携带重复妖怪");return;}
+    G.team.push(incoming.id);save();renderHub();toast("已编入队伍");}));
 }
 
 /* --- 名册图鉴 --- */
@@ -872,10 +937,11 @@ function rollRarity(force){
   if(x<.42)return "R2";
   return "R";
 }
-function drawCard(force){
-  // 保底：连续 9 抽未出 SSR，本次必定 SSR+
+function drawCard(force,excluded=[]){
+  // 新手抽取时排除已抽到的角色；普通抽卡暂沿用原保底逻辑。
   const rar=rollRarity(force||((G.pity||0)>=9?"SSR+":null));
-  const pool=CARDS.filter(c=>c.rar===rar);
+  let pool=CARDS.filter(c=>c.rar===rar&&!excluded.includes(c.num));
+  if(!pool.length)pool=CARDS.filter(c=>!excluded.includes(c.num)&&(!force||force!=="SR+"||c.rar!=="R"));
   const c=pool[Math.floor(Math.random()*pool.length)];
   if(rar==="S"||rar==="U")G.pity=0;else G.pity++;
   return c.num;
@@ -889,7 +955,7 @@ function gachaReveal(nums,done){
       <div class="g-flash"></div>
       <div class="g-card ${RAR[c.rar].cls}"><img src="cards/${c.num}.jpg" alt="${c.name}"><span class="g-rare ${RAR[c.rar].cls}">${GACHA.rareName[c.rar]}</span></div>
       <div class="g-name serif">${c.name}</div>
-      <div class="g-meta">${RAR[c.rar].n} · ${c.role} · ${FLOW[c.fac].name} · ${IDENT[c.idn].name}</div>
+      <div class="g-meta">${RAR[c.rar].n} · ${c.role} · ${LanglangRules.TYPES[LanglangRules.typeOf(c)]}</div>
       <div class="g-hint">${i+1<nums.length?"点击任意处继续揭示":"点击任意处收下"}</div>`;
     st.onclick=()=>{i++;if(i<nums.length)show();else{ovl("ovl-gacha",false);st.onclick=null;done&&done();}};
   };
@@ -932,14 +998,14 @@ function renderDetail(monId,viewNum){
   if(!c)return;
   const lvl=m?m.lvl:null;
   const st=lvl!=null?statsOf(c,lvl):statsOf(c,20);
-  const moves=movesOf(c);
+  const pool=LanglangRules.skillPool(c),selected=m?.selectedSkills||[0,1,2,3];
   $("#detail-body").innerHTML=`
     <div class="dt">
       <div class="pic"><img src="cards/${c.num}.jpg" alt="${c.name}"></div>
       <div class="inf">
         <div class="nm serif">${c.name}</div>
         <div class="sub">No.${c.num} · ${lvl!=null?"Lv."+lvl:"图鉴资料（未收编）"}</div>
-        <div class="tags">${flowChip(c.fac)}${idnChip(c.idn)}<span class="tag">${RAR[c.rar].n}</span><span class="tag">${c.role}</span></div>
+        <div class="tags">${typeChip(c)}<span class="tag">${RAR[c.rar].n}</span><span class="tag">${c.role}</span></div>
         <div class="statgrid">
           <div class="stat"><div class="k">体力 HP</div><div class="v">${st.hp}</div></div>
           <div class="stat"><div class="k">攻击</div><div class="v">${st.atk}</div></div>
@@ -948,58 +1014,62 @@ function renderDetail(monId,viewNum){
         </div>
       </div>
     </div>
-    <div class="movesec"><div class="ptitle">技能</div>
-      ${moves.map((mv,i)=>`<div class="move-row">
-        <span class="fn" style="background:${mv.type?IDENT[mv.type].c:"#7d6f57"}">${mv.type?IDENT[mv.type].name:"无属性"}</span>
-        <div><div class="nm">${mv.name}</div><div class="ds">${mv.desc}</div></div>
-        <span class="pp">${mv.cost} 妖力${mv.tier?" · 爆发解锁":""}<br>PP ${m?m.pp[i]:mv.pp}</span>
-      </div>`).join("")}
-    </div>
-    <div class="dimtx" style="font-size:11px;line-height:1.9;margin-top:4px">技能 6 个：直伤 / 冲撞（无属性普攻）/ 强攻 / 增益 / 负面状态 / 终极奥义。身份克制：神→魔→妖→鬼→神（+30%）；同身份技能 +20%。阵营（下排徽章）不参与克制，出战可触发阵营搭配组合。</div>`;
+    ${m?`<div class="panel" style="margin:10px 0"><div>经验 ${m.exp}/${expNeed(m.lvl)} · 经验果 ${G.items.expFruit||0} 个</div><button class="btn btn-gold" id="bt-use-fruit" style="margin-top:8px" ${!G.items.expFruit||m.lvl>=60?"disabled":""}>使用经验果 · 经验 +60</button></div>`:""}
+    ${m?`<div class="panel" style="margin:10px 0"><div>体力 ${m.hp}/${st.hp}</div><button class="btn btn-ghost" data-detail-use="pie" ${!G.items.pie||m.hp<=0||m.hp>=st.hp?'disabled':''}>疗伤烧饼 ×${G.items.pie||0}</button> <button class="btn btn-ghost" data-detail-use="puddin" ${!G.items.puddin||m.hp>0?'disabled':''}>还魂丹 ×${G.items.puddin||0}</button><div class="dimtx" style="font-size:11px">回灵果 ×${G.items.ppFruit||0} · 选择技能恢复 5 点 PP</div>${selected.map(idx=>`<button class="btn btn-ghost" data-detail-pp="${idx}" ${!G.items.ppFruit||(m.skillPP?.[idx]??pool[idx].pp)>=pool[idx].pp?'disabled':''}>${escapeHTML(pool[idx].name)} ${m.skillPP?.[idx]??pool[idx].pp}/${pool[idx].pp}</button>`).join(' ')}</div>`:''}
+    <div class="movesec"><div class="ptitle">${m?'已装备技能 · 可调整':'技能资料'}</div>
+      ${m?selected.map((idx,slot)=>`<label class="move-row">技能 ${slot+1} <select data-solo-skill="${slot}">${pool.map((mv,i)=>`<option value="${i}" ${idx===i?'selected':''} ${mv.learnLevel>m.lvl?'disabled':''}>${escapeHTML(mv.name)} · PP ${mv.pp}${mv.learnLevel>m.lvl?` · Lv${mv.learnLevel}解锁`:''}</option>`).join('')}</select></label>`).join(''):''}
+      ${pool.map(mv=>`<div class="move-row"><div><div class="nm">${escapeHTML(mv.name)}</div><div class="ds">${escapeHTML(mv.description||'')} · ${mv.target==='foes'?'对方全体':mv.target==='ally'?'自己或队友':mv.target==='self'?'自己':'对手'}</div></div><span class="pp">PP ${mv.pp}<br>${mv.learnLevel>1?`Lv${mv.learnLevel} 解锁`:'初始技能'}</span></div>`).join('')}
+    </div><div class="dimtx" style="font-size:11px;line-height:1.9;margin-top:4px">每只妖怪装备 4 个不同技能。升级可解锁新技能，竞技对战开放全部技能池。</div>`;
   ovl("ovl-detail",true);
+  $$('#detail-body [data-solo-skill]').forEach(el=>el.addEventListener('change',()=>{
+    if(!m)return;const slot=+el.dataset.soloSkill,next=m.selectedSkills.slice(),value=+el.value,other=next.indexOf(value),previous=next[slot];
+    if(other>=0&&other!==slot)next[other]=previous;next[slot]=value;
+    try{LanglangRules.equippedSkills({...c,selectedSkills:next},m.lvl,false);m.selectedSkills=next;save();renderDetail(m.id);toast('技能配置已保存');}catch(_){toast('该技能尚未解锁');renderDetail(m.id);}
+  }));
+  const fruitButton=$("#bt-use-fruit");if(fruitButton)fruitButton.addEventListener("click",()=>{
+    if(!G.items.expFruit||m.lvl>=60)return;
+    G.items.expFruit--;m.exp+=60;
+    while(m.lvl<60&&m.exp>=expNeed(m.lvl)){
+      m.exp-=expNeed(m.lvl);const before=statsOf(c,m.lvl).hp;m.lvl++;
+      if(m.hp>0)m.hp=Math.min(statsOf(c,m.lvl).hp,m.hp+statsOf(c,m.lvl).hp-before);
+    }
+    save();renderDetail(m.id);toast(`${c.name} 获得 60 经验`);
+  });
+  $$('#detail-body [data-detail-use]').forEach(el=>el.addEventListener('click',()=>{
+    if(!m)return;const item=el.dataset.detailUse;if(!G.items[item])return;
+    if(item==='pie'&&m.hp>0&&m.hp<st.hp)m.hp=Math.min(st.hp,m.hp+Math.max(1,Math.floor(st.hp*.3)));
+    else if(item==='puddin'&&m.hp<=0)m.hp=Math.max(1,Math.floor(st.hp*.5));else return;
+    G.items[item]--;save();renderDetail(m.id);toast('道具使用成功');
+  }));
+  $$('#detail-body [data-detail-pp]').forEach(el=>el.addEventListener('click',()=>{
+    const idx=+el.dataset.detailPp;if(!m||!G.items.ppFruit||!pool[idx])return;
+    m.skillPP=m.skillPP||pool.map(s=>s.pp);if(m.skillPP[idx]>=pool[idx].pp)return;
+    m.skillPP[idx]=Math.min(pool[idx].pp,m.skillPP[idx]+5);G.items.ppFruit--;save();renderDetail(m.id);toast('技能 PP 已恢复');
+  }));
 }
 
 /* ---------- 帮助 ---------- */
 function renderHelp(){
   $("#help-body").innerHTML=`
-    <div class="ptitle">核心规则（宝可梦式）</div>
+    <div class="ptitle">对战规则</div>
     <ul class="help">
-      <li>每场战斗各派 1 只妖怪出场，可随时换人（换人会消耗回合）。</li>
-      <li>每只妖怪 5 个技能，各有 <b style="color:#8fc7e8">PP 次数</b>，用完不能再用；战斗后自动回满。</li>
-      <li>速度高的先出手；技能命中后按属性克制结算伤害。</li>
-      <li>体力归零即失去战斗能力；对方全部失去战斗能力即获胜。</li>
-      <li>获胜获得经验与山核桃；满经验自动升级，能力成长。</li>
+      <li>每位玩家最多携带 3 只不同的妖怪；1v1 每方 1 人，2v2 每方 2 人。</li>
+      <li>每只妖怪装备 4 个技能，技能有独立的 PP；全部耗尽后可使用会造成反伤的奋力一击。</li>
+      <li>双方选择行动后按速度结算；主动换人消耗本回合行动。妖怪倒下后选择替补，不消耗下一回合行动。</li>
+      <li>山岭克水府，水府克炎荒，炎荒克山岭；幽洞中立。克制伤害 +30%。</li>
     </ul>
-    <div class="ptitle">边玩边学（v2.1）</div>
+    <div class="ptitle">巡山与养成</div>
     <ul class="help">
-      <li>技能行会<b style="color:var(--goldhi)">实时标注克制</b>：克制 +30%（金框）/ 同源 +20%（绿标）。</li>
-      <li><b style="color:var(--goldhi)">按住技能拖到对手身上</b>：会显示预计伤害区间，松手即施放；直接点击也照常出招。</li>
-      <li>战斗右上角有<b style="color:var(--goldhi)">常驻克制小盘</b>（半透明，随对阵发光），长按可放大查看全图与当前对阵。</li>
-      <li>第一次玩会自动进入「入门试炼」教学战，也可随时从玩法指南重开。</li>
+      <li>在四方地界巡山，削弱野生妖怪后使用收妖葫芦；收服失败可继续尝试，打倒后需重新遇见。</li>
+      <li>重复收服转化为经验果；经验可提升等级并解锁技能，在妖怪档案配置。</li>
+      <li>体力和 PP 会保留，可使用道具或在队伍页面休整。战败和完成教学后免费恢复。</li>
     </ul>
-    <div class="ptitle">身份克制（神魔妖鬼）</div>
-    <div class="wheel">
-      <span class="f" style="background:${IDENT.shen.c}">神</span><span class="a">➜</span>
-      <span class="f" style="background:${IDENT.mo.c}">魔</span><span class="a">➜</span>
-      <span class="f" style="background:${IDENT.yao.c}">妖</span><span class="a">➜</span>
-      <span class="f" style="background:${IDENT.gui.c}">鬼</span><span class="a">➜</span>
-      <span class="f" style="background:${IDENT.shen.c}">神</span>
-    </div>
+    <div class="ptitle">竞技</div>
     <ul class="help">
-      <li>攻击所克身份：伤害 <b style="color:#ffb46b">+30%</b>（神克魔、魔克妖、妖克鬼、鬼克神）。</li>
-      <li>使用<b style="color:var(--goldhi)">同身份技能</b>有 +20% 加成（同源）。</li>
-      <li>阵营不参与克制，只提供<b style="color:var(--goldhi)">搭配组合</b>：三同源（伤害+10%）、山海同盟（生命+10%）、裂谷猎团（攻+8%）、昼夜巡山（速+10%）、幽波引渡（防+10%）、毒沼滋生（回妖力）、幽瘴毒巢（跳伤加强）、大混编（妖力+15%）。</li>
-    </ul>
-    <div class="ptitle">收服（仅限野生妖怪）</div>
-    <ul class="help">
-      <li>战斗中用「紫金红葫芦」收服野生妖怪：对方体力越低成功率越高，稀有度越高越难收。</li>
-      <li>头目战不可收服，但通关会直接掉落卡牌。</li>
-    </ul>
-    <div class="ptitle">其他</div>
-    <ul class="help">
-      <li>每场战斗后全队自动回满（疗养院包月）；失败没有惩罚，可无限再战。</li>
-      <li>山核桃在商店购买葫芦、烧饼、布丁。</li>
-      <li>进度自动保存在本机浏览器，下次打开点「继续冒险」。</li>
+      <li>竞技妖怪统一 30 级，技能池全部开放；8 只公共妖怪免费使用。</li>
+      <li>每只妖怪可携带一件免费道具，开战前公开；竞技中不能使用背包消耗品。</li>
+      <li>选招及替补选择超时会自动行动；断线后暂停等待重连。</li>
+      <li>游戏进度仅保存在当前浏览器。</li>
     </ul>`;
   ovl("ovl-help",true);
 }
@@ -1008,20 +1078,24 @@ function renderHelp(){
    v2.1 边玩边学：伤害预演 / 克制盘 / 拖拽施法 / 引导
 ===================================================== */
 
+function showTypeGuide(){
+  $('#wheel-pop').innerHTML=`<button class="wx" id="type-guide-close" aria-label="关闭">✕</button><div class="wt serif">四方地界 · 相克</div><div class="wmatch"><b>山岭 → 水府 → 炎荒 → 山岭</b><br>幽洞与其他地界之间没有克制关系</div><div class="wnote">克制伤害 +30%；使用自身属性的技能获得同源加成。具体数值可根据试玩调整。</div>`;
+  ovl('ovl-wheel',true);$('#type-guide-close').addEventListener('click',()=>ovl('ovl-wheel',false));
+}
 /* --- 玩法指南入口（取代纯文字说明） --- */
 function openGuide(){
   $("#pick-title").textContent="玩法指南";
   $("#pick-body").innerHTML=`
-    <div class="pickrow"><div class="gic">🎓</div><div class="inf"><div class="nm">边玩边学 · 入门试炼战</div><div class="mt">打一场教学战，实战学会克制、拖拽预演、克制盘、葫芦收服</div></div><button class="btn btn-gold" data-gd="tut" style="flex:none">开始</button></div>
-    <div class="pickrow"><div class="gic">🧭</div><div class="inf"><div class="nm">克制关系速查</div><div class="mt">放大版克制生态盘${B&&!B.over?"（含当前对阵分析）":""}</div></div><button class="btn btn-gold" data-gd="wheel" style="flex:none">查看</button></div>
+    <div class="pickrow"><div class="gic">🎓</div><div class="inf"><div class="nm">边玩边学 · 入门试炼战</div><div class="mt">通过实战学习选择技能、确认出招和收服</div></div><button class="btn btn-gold" data-gd="tut" style="flex:none">开始</button></div>
+    <div class="pickrow"><div class="gic">🧭</div><div class="inf"><div class="nm">克制关系速查</div><div class="mt">山岭、水府、炎荒和幽洞</div></div><button class="btn btn-gold" data-gd="wheel" style="flex:none">查看</button></div>
     <div class="pickrow"><div class="gic">📜</div><div class="inf"><div class="nm">文字速查</div><div class="mt">完整规则说明（给喜欢读说明书的人）</div></div><button class="btn btn-gold" data-gd="text" style="flex:none">打开</button></div>`;
   ovl("ovl-pick",true);
   $$("#pick-body [data-gd]").forEach(b=>b.addEventListener("click",()=>{
     const g=b.dataset.gd;ovl("ovl-pick",false);
-    if(g==="wheel")openWheel();
+    if(g==="wheel")showTypeGuide();
     else if(g==="text")renderHelp();
     else{
-      if(!G||!G.roster.length){newGame();openStarter();toast("先选一位初始搭档，试炼马上开始");}
+      if(!G||!G.roster.length){newGame();openStarter(true);toast("先抽取初始搭档，试炼马上开始");}
       else tutStart();
     }
   }));
@@ -1030,7 +1104,7 @@ function openGuide(){
 /* --- 即时伤害预览（确定性区间：无会心，随机浮动取 0.85~1.0） --- */
 function damageProfile(att,def,mv){
   const ac=byNum(att.mon.num),dc=byNum(def.mon.num);
-  const a=statsOf(ac,att.mon.lvl),d=statsOf(dc,def.mon.lvl);
+  const a=monStats(att.mon),d=monStats(def.mon);
   const attack=Math.max(1,Math.round(a.atk*stageMul(att.atkS)*(att.atkMul||1)));
   const defense=Math.max(1,Math.round(d.def*stageMul(def.defS)*(def.defMul||1)));
   const base=Math.floor(Math.floor(42*mv.pow*attack/defense/50)+2);
@@ -1229,7 +1303,7 @@ function renderCoach(){
   const ar=$("#app").getBoundingClientRect(),r=t.getBoundingClientRect();
   const pad=6,x=r.left-ar.left-pad,y=r.top-ar.top-pad,w=r.width+pad*2,h=r.height+pad*2;
   c.innerHTML=`<div class="coach-ring" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px"></div>
-    <div class="coach-tip" id="coach-tip">${COACH.text}<br><span class="coach-skip" id="coach-skip">跳过引导 ✕</span></div>`;
+    <div class="coach-tip" id="coach-tip">${COACH.text}<br><button type="button" class="coach-skip" id="coach-skip">跳过引导，返回巡山 ✕</button></div>`;
   c.classList.add("on");
   const tip=$("#coach-tip");
   const tx=Math.max(8,Math.min(x,ar.width-260));
@@ -1254,7 +1328,10 @@ function bestMoveIdx(){
 function tutTick(){
   if(!TUT.on||!B||B.over)return;
   if(TUT.step===1&&B.mode==="menu")coach("#bt-fight","点【战 斗】，选一个技能出手");
-  else if(TUT.step===2&&B.mode==="fight")coach(`#bt-menu [data-mv="${bestMoveIdx()}"]`,"金框 = 克制！<b>按住亮着的技能，拖到对手身上</b>再松手（直接点击也行）");
+  else if(TUT.step===2&&B.mode==="fight"){
+    if(B.selectedMove!=null)coach("#bt-confirm-move","确认技能和目标后，点<b>确认出招</b>；也可以换选其他技能");
+    else coach(`#bt-menu [data-mv="${bestMoveIdx()}"]`,"金框 = 克制！先<b>选择一个可用技能</b>，确认后出招");
+  }
   else if(TUT.step===3)coach("#mini-wheel","右上角小盘是<b>克制盘</b>，试试<b>长按</b>放大看清克制关系");
   else if(TUT.step>=5){
     const e=E();
@@ -1281,8 +1358,10 @@ function completeTut(){
 }
 function endTutorial(){
   if(!TUT.on)return;
-  TUT.on=false;G.tut=true;save();coachHide();
-  toast("引导已跳过，随时点「? 帮助」复习");
+  TUT.on=false;G.tut=true;
+  if(B&&B.tutorial){G.roster.forEach(healMon);B=null;}
+  save();coachHide();tab="map";enterHub();
+  toast("引导已跳过，可随时在玩法指南中重开");
 }
 
 /* =====================================================
@@ -1291,7 +1370,7 @@ function endTutorial(){
 let B=null;
 function stageMul(s){return s>=0?(2+s)/2:2/(2-s);}
 function makeFoe(entry){const m=mkMon(entry[0],entry[1]);return m;}
-function wrap(mon){return {mon,atkS:0,defS:0,maxHp:statsOf(byNum(mon.num),mon.lvl).hp,energy:20,awakened:false,status:{},stunImmune:0,atkMul:1,defMul:1,spdMul:1,gainMul:1,dotBonus:0,enBonus:0};}
+function wrap(mon){return {mon,atkS:0,defS:0,maxHp:monStats(mon).hp,energy:20,awakened:false,status:{},stunImmune:0,atkMul:1,defMul:1,spdMul:1,gainMul:1,dotBonus:0,enBonus:0};}
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function moveLock(w,mv,i){
   if(!Number.isFinite(w.mon.pp[i])||w.mon.pp[i]<=0)return "次数耗尽";
@@ -1324,6 +1403,11 @@ function fighterHTML(w,side){
   </div>`;
 }
 
+function startPatrol(type){
+  const encounter=LanglangRules.chooseEncounter(CARDS,type,G.cleared.length);
+  if(!encounter){toast("这个地界暂时没有可遇见的妖怪");return;}
+  startBattle({id:"patrol",ch:0,name:LanglangRules.TYPES[type]+"巡山",wild:true,patrol:true,foes:[[encounter.num,encounter.level]],reward:100,drop:null});
+}
 function startBattle(stageId){
   const isTut=stageId==="tut";
   let st;
@@ -1332,11 +1416,12 @@ function startBattle(stageId){
     if(!p0){toast("队伍里没有能战斗的妖怪");return;}
     // 教学对手：选一只被玩家流派克制的防御型妖怪，等级贴着玩家，保证打得动也打得死
     const pc0=byNum(p0.num);
-    const dummy={shen:"036",mo:"061",yao:"072",gui:"075"}[pc0.idn];
+    const dummy={mountain:"030",water:"003",fire:"071",cave:"071"}[LanglangRules.typeOf(pc0)];
     st={id:-1,ch:0,name:"入门试炼",ds:"",wild:true,foes:[[dummy,Math.max(5,Math.min(30,p0.lvl+2))]],reward:100,drop:null,tutorial:true};
-  }else st=STAGES[stageId];
+  }else st=typeof stageId==="object"?stageId:STAGES[stageId];
   const team=aliveTeam();
   if(!team.length){toast("队伍里没有能战斗的妖怪");return;}
+  if(typeof v3StartSolo==='function'){v3StartSolo(st,stageId,team);return;}
   B={
     combos:[],stage:st,stageId,
     wild:st.wild,tutorial:isTut,
@@ -1395,6 +1480,11 @@ function renderBattle(){
     <button class="mw" id="mini-wheel" aria-label="身份克制盘 · 长按放大" title="身份克制盘 · 长按放大">${wheelSVG(false)}</button>
     <button class="flee" id="bt-flee" title="逃跑">🏃</button></div><div class="combo-row">${B.combos.map(cb=>`<span class="combo-chip">${cb.tag} ${cb.name} · ${cb.desc}</span>`).join("")}</div>${fighterHTML(e,"enemy")}${fighterHTML(p,"player")}`;
   bindWheel();updateWheelGlow();
+  if(B.mode==="fight"&&Number.isInteger(B.selectedMove)){
+    const selected=movesOf(pc)[B.selectedMove];
+    const target=selected&&selected.target==="self"?$("#m-player .m-sprite"):$("#m-enemy .m-sprite");
+    if(target)target.classList.add("target-selected");
+  }
   $("#bt-sound").addEventListener("click",e=>{soundMuted=!soundMuted;e.currentTarget.textContent=soundMuted?"♪̸":"♪";e.currentTarget.setAttribute("aria-label",soundMuted?"开启音效":"关闭音效");});
   $("#bt-flee").addEventListener("click",doRun);
   if(B.over){coachHide();return;}
@@ -1410,13 +1500,16 @@ function renderBattle(){
     $("#bt-run").addEventListener("click",doRun);
   }else if(B.mode==="fight"){
     const moves=movesOf(pc);
-    menu.innerHTML=battleLogHTML()+burstBtn+`<div class="skill-grid">${moves.map((mv,i)=>{
+    const choicePanel=Number.isInteger(B.selectedMove)&&moves[B.selectedMove]&&!moveLock(p,moves[B.selectedMove],B.selectedMove)?`<div class="choice-panel" aria-live="polite">已选 <b>${escapeHTML(moves[B.selectedMove].name)}</b> · 目标：<b>${escapeHTML(moves[B.selectedMove].target==="self"?pc.name:ec.name)}</b><div class="choice-actions"><button class="btn btn-gold choice-confirm" id="bt-confirm-move">确认出招</button></div></div>`:'<div class="choice-panel" aria-live="polite">请选择一个可用技能；选中后可查看目标并确认。</div>';
+    menu.innerHTML=battleLogHTML()+burstBtn+choicePanel+`<div class="skill-grid">${moves.map((mv,i)=>{
       const em=mv.pow?effOf(mv.type,ec.idn):1,lock=moveLock(p,mv,i),sealed=mv.tier&&!p.awakened;
       const badge=mv.pow?(em>1?'克制 +30%':(mv.type===pc.idn?'同源 +20%':'普通效果')):mv.category;
-      return `<button class="skill-card ${sealed?"sealed":""} ${mv.tier===2?"ultimate":""} ${em>1?"eff-super":""}" data-mv="${i}" ${lock?"disabled":""} style="--flow:${IDENT[mv.type]?IDENT[mv.type].c:"#8a7a5e"}">
-        <span class="skill-icon">${sealed?"◇":mv.icon}</span><span class="skill-info"><b>${mv.name}</b><span class="skill-type">${mv.category} · ${badge}</span><span class="skill-desc">${mv.desc}</span><span class="skill-cost">${lock||`${mv.cost?"妖力 −"+mv.cost:"妖力 +"+(mv.gain!==undefined?mv.gain:22)} · PP ${p.mon.pp[i]}/${mv.pp}`}</span></span></button>`;
+      const selected=B.selectedMove===i;
+      return `<button class="skill-card ${sealed?"sealed":""} ${mv.tier===2?"ultimate":""} ${em>1?"eff-super":""} ${selected?"selected-skill":""}" data-mv="${i}" aria-pressed="${selected}" ${lock?"disabled":""} style="--flow:${IDENT[mv.type]?IDENT[mv.type].c:"#8a7a5e"}">
+        <span class="skill-icon">${sealed?"◇":mv.icon}</span><span class="skill-info"><b>${escapeHTML(mv.name)}</b><span class="skill-type">${mv.category} · ${badge}</span><span class="skill-desc">${mv.desc}</span><span class="skill-cost">${lock||`${mv.cost?"妖力 −"+mv.cost:"妖力 +"+(mv.gain!==undefined?mv.gain:22)} · PP ${p.mon.pp[i]}/${mv.pp}`}</span><span class="skill-availability">${lock?"不可用 · "+escapeHTML(lock):selected?"✓ 已选择":"可选择"}</span></span></button>`;
     }).join("")}</div><div class="backrow"><button id="bt-back">← 返回</button>${moves.every((mv,i)=>moveLock(p,mv,i))?'<button id="bt-rest">休整 · 回复 22 妖力</button>':'<span class="drag-note">拖向对手预演 · 增益拖向自己</span>'}</div>`;
-    $$("#bt-menu [data-mv]").forEach(b=>{const i=+b.dataset.mv;b.addEventListener("click",()=>{if(!suppressClick)playerMove(i);});bindMoveDrag(b,i,moves[i]);});
+    $$("#bt-menu [data-mv]").forEach(b=>{const i=+b.dataset.mv;b.addEventListener("click",()=>{if(!suppressClick){B.selectedMove=i;renderBattle();$("#scr-battle").scrollTop=0;}});bindMoveDrag(b,i,moves[i]);});
+    const confirm=$("#bt-confirm-move");if(confirm)confirm.addEventListener("click",()=>playerMove(B.selectedMove));
     const rest=$("#bt-rest");if(rest)rest.addEventListener("click",playerRest);
   }else if(B.mode==="mons"){
     menu.innerHTML=battleLogHTML()+`<div class="sublist">${switchListHTML(B.aP)}</div><div class="backrow"><button id="bt-back">← 返回</button></div>`;
@@ -1500,7 +1593,15 @@ async function burstFX(w,side){
 }
 async function awaken(w,side){
   if(w.awakened||w.energy<60)return false;
-  w.energy-=60;await burstFX(w,side);return true;
+  w.energy-=60;
+  if(B.online){
+    const battle=B, pos=fieldPosition(w);
+    const delta=Math.ceil(w.maxHp*.5);w.maxHp+=delta;w.mon.hp+=delta;w.awakened=true;
+    combatLog("burst",byNum(w.mon.num).name,null,"生命上限突破",delta);
+    await showBattleEvent({actor:pos,target:pos,name:"战意爆发",fac:byNum(w.mon.num).fac,result:"生命上限 +"+delta});
+    if(B===battle){renderBattle();sendNetSnap();}
+  }else await burstFX(w,side);
+  return true;
 }
 async function playerBurst(){
   if(!B||B.busy||B.over||B.forced||P().awakened||P().energy<60)return;
@@ -1510,6 +1611,46 @@ async function playerBurst(){
   initAudio();B.busy=true;coachHide();renderBattle();await awaken(P(),"player");
   if(!B||B.over)return;
   B.busy=false;B.mode="fight";renderBattle();
+}
+// 联机使用固定阵营和位置标识，避免不同玩家视角造成目标错位。
+function fieldPosition(w){
+  if(!B.online)return {side:B.pTeam.includes(w)?"p":"e",slot:0};
+  for(const side of ["p","e"]){const slot=fieldList(side).findIndex(f=>f.wrap===w);if(slot>=0)return {side,slot};}
+  return null;
+}
+function battleCard(pos){
+  if(!pos)return null;
+  if(B&&B.online)return document.querySelector(`[data-field="${pos.side}-${pos.slot}"] .dcard`);
+  return document.querySelector(`#m-${pos.side==="p"?"player":"enemy"} .m-sprite`);
+}
+let battleFxUntil=0,battleFxTimer=null;
+function playBattleEvent(evt){
+  const arena=$("#bt-arena"),actor=battleCard(evt.actor),target=battleCard(evt.target);
+  if(!arena||!actor||!target)return;
+  const ar=arena.getBoundingClientRect(),a=actor.getBoundingClientRect(),t=target.getBoundingClientRect();
+  const sx=a.left+a.width/2-ar.left,sy=a.top+a.height/2-ar.top,tx=t.left+t.width/2-ar.left,ty=t.top+t.height/2-ar.top;
+  const colors={L:"#b5c66b",D:"#c08cff",T:"#75d8f1",G:"#f0a178"};
+  const layer=document.createElement("div");layer.className="battle-fx-layer";
+  layer.style.cssText=`--sx:${sx}px;--sy:${sy}px;--tx:${tx}px;--ty:${ty}px;--dx:${tx-sx}px;--dy:${ty-sy}px;--fx-color:${colors[evt.fac]||"#f4cf7c"}`;
+  const label=document.createElement("div");label.className="battle-fx-name";label.textContent=evt.name;layer.appendChild(label);
+  if(actor!==target){const projectile=document.createElement("div");projectile.className="battle-projectile";layer.appendChild(projectile);}
+  const impact=document.createElement("div");impact.className="battle-impact";layer.appendChild(impact);
+  if(evt.result){const number=document.createElement("div");number.className="battle-fx-number";number.textContent=evt.result;layer.appendChild(number);}
+  arena.appendChild(layer);
+  const reduced=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(!reduced&&actor.animate){
+    const dx=tx-sx,dy=ty-sy,len=Math.hypot(dx,dy)||1;
+    actor.animate([{transform:"translate(0,0)"},{transform:`translate(${-dx/len*7}px,${-dy/len*7}px)`,offset:.2},{transform:`translate(${dx/len*22}px,${dy/len*22}px)`,offset:.48},{transform:"translate(0,0)"}],{duration:650,easing:"ease-out"});
+    if(actor!==target)setTimeout(()=>{if(target.isConnected)target.animate([{transform:"translate(0,0)"},{transform:`translate(${dx/len*9}px,${dy/len*9}px)`},{transform:"translate(0,0)"}],{duration:260});},300);
+  }
+  tone(evt.result==="MISS"?180:140,.13,0,"triangle",.07);
+  setTimeout(()=>layer.remove(),800);
+  battleFxUntil=Date.now()+750;
+}
+async function showBattleEvent(evt){
+  if(B&&B.online&&NET.isHost)await broadcast({t:"fx",event:evt});
+  playBattleEvent(evt);
+  await wait(750);
 }
 function calcDamage(att,def,mv){const r=damageProfile(att,def,mv),crit=Math.random()<1/16;return {dmg:Math.max(1,Math.floor(r.value*(.85+Math.random()*.15)*(crit?1.5:1))),emul:r.emul,crit};}
 function applyStatus(target,kind){
@@ -1530,14 +1671,18 @@ async function useMove(att,def,idx,side){
   const lock=moveLock(att,mv,idx);if(lock){logLine("sys",name+" · "+lock);return;}
   att.mon.pp[idx]--;att.energy-=mv.cost;
   const targetSide=side==="p"?"enemy":"player",ownSide=side==="p"?"player":"enemy";
-  if(mv.tier===2){$("#m-"+ownSide+" .m-sprite").classList.add("ultimate-cast");tone(120,.4,0,"triangle",.1);tone(720,.3,.15,"sine",.06);}
+  if(mv.tier===2){tone(120,.4,0,"triangle",.1);tone(720,.3,.15,"sine",.06);}
   await wait(mv.tier===2?330:160);
   if(!B)return;
-  if(Math.random()*100>=mv.acc){combatLog("miss",name,mv,"未命中 · 妖力与次数已消耗");floatDmg(targetSide,"MISS");tone(180,.1,0,"triangle");refreshBars();await wait(430);if(!B)return;}
+  if(Math.random()*100>=mv.acc){
+    combatLog("miss",name,mv,"未命中 · 妖力与次数已消耗");
+    await showBattleEvent({actor:fieldPosition(att),target:fieldPosition(def),name:mv.name,fac:byNum(att.mon.num).fac,result:"MISS"});
+    if(B){refreshBars();if(B.online){renderBattle();sendNetSnap();}}return;
+  }
   if(mv.pow){
     const r=calcDamage(att,def,mv);def.mon.hp=Math.max(0,def.mon.hp-r.dmg);gainEnergy(att,mv.gain!==undefined?mv.gain:(mv.cost?8:22));gainEnergy(def,14);
     combatLog("hit",name,mv,`${target}${r.crit?" · 暴击 ×1.5":""}${r.emul>1?" · 克制 +30%":""}`,r.dmg);
-    floatDmg(targetSide,r.dmg,false);shake(targetSide);tone(mv.tier===2?80:150,.13,0,"triangle",.08);
+    mv._battleResult=(r.crit?"暴击 ":r.emul>1?"克制 ":"")+"−"+r.dmg;
     if(mv.tier===2){const arena=$("#bt-arena");arena.classList.add("ultimate-impact");setTimeout(()=>arena.classList.remove("ultimate-impact"),450);}
   }
   if(!mv.pow||mv.kind){
@@ -1551,9 +1696,9 @@ async function useMove(att,def,idx,side){
       else{if(!mv.pow)combatLog("debuff",name,mv,"命中 "+target);applyStatus(def,mv.kind);}
     }
   }
-  await wait(mv.tier===2?720:480);
+  await showBattleEvent({actor:fieldPosition(att),target:fieldPosition(mv.target==="self"?att:def),name:mv.name,fac:byNum(att.mon.num).fac,result:mv._battleResult||""});
   if(!B)return;
-  refreshBars();
+  refreshBars();if(B.online){renderBattle();sendNetSnap();}
 }
 function firstAlive(list){return list.findIndex(w=>w.mon.hp>0);}
 async function playerMove(idx){
@@ -1561,6 +1706,7 @@ async function playerMove(idx){
   const p=P(),e=E(),mv=movesOf(byNum(p.mon.num))[idx];if(!mv||moveLock(p,mv,idx))return;
   if(B.online)return;
   if(TUT.on&&TUT.step===2)TUT.step=3;
+  B.selectedMove=null;
   initAudio();B.busy=true;B.mode="fight";coachHide();renderBattle();
   const ps=statsOf(byNum(p.mon.num),p.mon.lvl).spd*(p.spdMul||1),es=statsOf(byNum(e.mon.num),e.mon.lvl).spd*(e.spdMul||1);
   if(ps>es||(ps===es&&Math.random()<.5)){await useMove(p,e,idx,"p");if(!B)return;if(e.mon.hp>0&&p.mon.hp>0)await enemyAct();}
@@ -1630,7 +1776,11 @@ async function useItem(k){
   if(k==="gourd"){
     if(TUT.on)completeTut();const e=E(),c=byNum(e.mon.num),rar={R:1,R2:.7,S:.45,U:.25}[c.rar];
     const rate=Math.min(.95,Math.max(.05,(1-e.mon.hp/e.maxHp*.75)*rar));logLine("sys","向 "+c.name+" 扔出了紫金红葫芦…");await wait(650);
-    if(Math.random()<rate){const caught=mkMon(e.mon.num,e.mon.lvl);G.roster.push(caught);finishBattle({kind:"catch",mon:caught});return;}
+    if(Math.random()<rate){
+      const caught=mkMon(e.mon.num,e.mon.lvl),duplicate=G.roster.some(m=>m.num===caught.num);
+      if(duplicate)G.items.expFruit=(G.items.expFruit||0)+1;else G.roster.push(caught);
+      finishBattle({kind:"catch",mon:caught,duplicate});return;
+    }
     if(!B)return;
     logLine("eff-weak",c.name+" 挣脱了葫芦！");
   }else if(k==="pie"){
@@ -1677,12 +1827,11 @@ function finishBattle(kindObj){
     const won=kindObj.kind==="win"||kindObj.kind==="catch";
     title=won?"试炼完成！":"试炼中断";cls=won?"":"lose";
     if(won){
-      if(kindObj.kind==="catch")lines.push(`${byNum(kindObj.mon.num).name}（Lv.${kindObj.mon.lvl}）已收入名册，去【队伍】编入出战！`);
+      if(kindObj.kind==="catch")lines.push(kindObj.duplicate?`已收服过 ${byNum(kindObj.mon.num).name}，获得经验果 ×1！`:`${byNum(kindObj.mon.num).name}（Lv.${kindObj.mon.lvl}）已收入名册，去【队伍】编入出战！`);
       lines.push("边玩边学毕业！要点回顾：");
-      lines.push("· 克制（金框）伤害 +30%，阵营组合看头顶徽章");
-      lines.push("· 按住技能拖到对手身上＝施放＋伤害预演");
-      lines.push("· 战斗右上角克制小盘，长按放大");
-      lines.push("· 把野生妖怪打到残血，扔葫芦收服");
+      lines.push("· 山岭克水府，水府克炎荒，炎荒克山岭；幽洞中立。");
+      lines.push("· 选择技能并确认出招；技能使用次数由 PP 限制。");
+      lines.push("· 把野生妖怪打到残血，使用葫芦收服。");
       if(!G._tutRew){G._tutRew=1;G.coin+=100;lines.push("试炼奖励：山核桃 +100");}
       lines.push("正式开练：去【巡山】挑一个山头吧！");
     }else{
@@ -1705,9 +1854,12 @@ function finishBattle(kindObj){
           const before=statsOf(byNum(m.num),m.lvl-1),after=statsOf(byNum(m.num),m.lvl);
           m.hp=Math.min(after.hp,m.hp+(after.hp-before.hp));
           lines.push(`${byNum(m.num).name} 升级了！→ Lv.${m.lvl}`);
+          LanglangRules.skillPool(byNum(m.num)).filter(s=>s.learnLevel===m.lvl).forEach(s=>lines.push(`解锁技能：${s.name}，可在妖怪档案中配置`));
         }
       });
-      if(!G.cleared.includes(B.stageId)){
+      if(st.patrol){
+        G.coin+=st.reward;lines.push(`巡山奖励：山核桃 +${st.reward}`);
+      }else if(!G.cleared.includes(B.stageId)){
         G.cleared.push(B.stageId);
         G.coin+=st.reward;
         lines.push(`通关奖励：山核桃 +${st.reward}`);
@@ -1732,7 +1884,7 @@ function finishBattle(kindObj){
     }else{
       G.coin+=50;
       lines.push(`收服报酬：山核桃 +50`);
-      lines.push(`${byNum(kindObj.mon.num).name}（Lv.${kindObj.mon.lvl}）加入了名册，记得去「队伍」编入出战！`);
+      lines.push(kindObj.duplicate?`已收服过 ${byNum(kindObj.mon.num).name}，获得经验果 ×1；可在妖怪档案中使用。`:`${byNum(kindObj.mon.num).name}（Lv.${kindObj.mon.lvl}）加入了名册，记得去「队伍」编入出战！`);
       title="收服成功！";cls="catch";
     }
   }else if(kindObj.kind==="lose"){
@@ -1743,8 +1895,8 @@ function finishBattle(kindObj){
     title="逃跑成功";cls="lose";
     lines.push("溜了溜了，山核桃都忘了拿。");
   }
-  // 全队回满
-  G.roster.forEach(healMon);
+  // 教学和战败后免费恢复，其余情况保留体力与技能 PP。
+  if(B.tutorial||kindObj.kind==='lose')G.roster.forEach(healMon);
   save();
   const rt=$("#res-title");rt.textContent=title;rt.className="res-t "+cls;
   let html=lines.map(t=>`<div>${t}</div>`).join("");
@@ -1836,9 +1988,9 @@ function relayFail(e){
 /* ---------- 消息收发 ---------- */
 function relaySend(target,msg){
   const d=dbx();if(!d||!NET.code||!NET.pid)return;
-  d.from("lls_pkt").insert({room:NET.code,sender:NET.pid,target:target,payload:msg}).then(r=>{
+  return d.from("lls_pkt").insert({room:NET.code,sender:NET.pid,target:target,payload:msg}).then(r=>{
     if(r&&r.error)relayFail(r.error);
-  });
+  }).catch(relayFail);
 }
 function hostConn(pid){
   let c=NET.conns.find(x=>x.pid===pid);
@@ -1857,6 +2009,7 @@ function hostConn(pid){
 function relayHandleHostPkt(pid,d){
   if(!pid||!d||typeof d!=="object")return;
   const c=hostConn(pid);
+  if(B&&B.v3&&B.arena&&B.arena.battle.clock.disconnected[pid]!==undefined&&typeof v3Reconnect==='function')v3Reconnect(pid);
   if(d.t==="ping")return;
   if(d.t==="bye"){c.close();return;}
   if(LOBBY)onGuestMsg(c,d);
@@ -1879,7 +2032,8 @@ function relayLoop(){
       .eq("room",NET.code).gt("id",NET._lastId||0).order("id",{ascending:true}).limit(120)
       .then(r=>{
         NET._busy=false;
-        if(r&&r.error){relayFail(r.error);return;}
+        if(r&&r.error){if(typeof v3RelayError==='function')v3RelayError();relayFail(r.error);return;}
+        if(typeof v3RelayOk==='function')v3RelayOk();
         const rows=(r&&r.data)||[];
         rows.forEach(row=>{
           if(row.id>(NET._lastId||0))NET._lastId=row.id;
@@ -1889,11 +2043,12 @@ function relayLoop(){
             relayHandleGuestPkt(row);
           }
         });
+        if(!NET.isHost&&B&&B.v3&&typeof v3SaveGuestSession==='function')v3SaveGuestSession();
         if(NET.isHost){
           const now=Date.now();
           NET.conns.slice().forEach(c=>{if(now-(c._seen||now)>20000)c.close();});
         }
-      }).catch(()=>{NET._busy=false;});
+      }).catch(()=>{NET._busy=false;if(typeof v3RelayError==='function')v3RelayError();});
   },400);
 }
 /* ---------- 心跳 ---------- */
@@ -1902,13 +2057,14 @@ function relayHeartbeat(){
   NET._hb=setInterval(()=>{
     if(!NET.code)return;
     if(NET.isHost){
-      if(LOBBY)boardPublish({code:NET.code,mode:LOBBY.mode,count:LOBBY.players.filter(p=>!p.ai).length});
+      if(LOBBY&&!(B&&B.online&&B.over))boardPublish({code:NET.code,mode:LOBBY.mode,count:LOBBY.players.filter(p=>!p.ai).length});
       else boardUnpublish(NET.code);
       return;
     }
     relaySend("host",{t:"ping",pid:NET.pid});
     const d=dbx();if(!d)return;
     d.from("lls_room").select("updated_at").eq("code",NET.code).maybeSingle().then(r=>{
+      if(B&&B.v3&&typeof v3CheckHostHeartbeat==='function'){if(!r||r.error)return;v3CheckHostHeartbeat(r.data);return;}
       const row=r&&r.data;
       const alive=row&&(Date.now()-new Date(row.updated_at).getTime()<90000);
       if(!alive&&LOBBY){toast("与房主的连接已断开");netCleanup();tab="vs";enterHub();renderHub();}
@@ -1916,6 +2072,9 @@ function relayHeartbeat(){
   },6000);
 }
 function netCleanup(){
+  if(NET._v3timer)clearInterval(NET._v3timer);
+  if(typeof v3ClearGuestSession==='function')v3ClearGuestSession();
+  if(typeof v3ClearHostSession==='function')v3ClearHostSession();
   ["pubTimer","_loop","_hb","_joinTo"].forEach(k=>{if(NET[k]){clearInterval(NET[k]);NET[k]=null;}});
   const code=NET.code;
   if(code){
@@ -1952,6 +2111,7 @@ function startHost(code){
   NET.code=code;NET.isHost=true;NET.pid=HOST_PID;NET.peer={relay:true};
   NET.conns=[];NET._lastId=0;NET._busy=false;
   LOBBY={mode:"1v1",players:[{pid:HOST_PID,name:myName(),side:0,ready:false,ai:false,pick:[],cards:[]}]};
+  syncLobbyState();
   tab="vs";enterHub();renderHub();
   toast("房间创建成功 · 码 "+code);
   boardPublish({code:code,mode:LOBBY.mode,count:1});
@@ -1986,7 +2146,7 @@ function joinRoom(code){
       NET.host={open:true,send:m=>relaySend("host",m)};
       NET.conns=[];NET._lastId=0;NET._busy=false;
       tab="vs";renderHub();
-      relaySend("host",{t:"hello",pid:NET.pid,name:myName(),lvl:avgTeamLvl(),cards:G.roster.map(cardBrief)});
+      relaySend("host",{t:"hello",pid:NET.pid,name:myName(),lvl:30,cards:competitionCards()});
       relaySend("host",{t:"ping",pid:NET.pid});
       relayLoop();relayHeartbeat();
       const t0=Date.now();
@@ -2004,37 +2164,40 @@ function joinRoom(code){
   });
 }
 function sendTo(pid,msg){
-  if(NET.isHost){const c=NET.conns.find(x=>x.pid===pid);if(c&&c.open)c.send(msg);}
-  else if(NET.host&&NET.host.open)NET.host.send(msg);
+  if(NET.isHost){const c=NET.conns.find(x=>x.pid===pid);if(c&&c.open)return c.send(msg);}
+  else if(NET.host&&NET.host.open)return NET.host.send(msg);
 }
-function broadcast(msg){if(NET.isHost)NET.conns.forEach(c=>{if(c.open)c.send(msg);});}
+function broadcast(msg){return Promise.all(NET.isHost?NET.conns.filter(c=>c.open).map(c=>c.send(msg)):[]);}
 function pushLobby(){syncLobbyState();broadcast({t:"lobby",lobby:lobbySnap()});
   if(NET.isHost&&NET.code)boardPublish({code:NET.code,mode:LOBBY.mode,count:LOBBY.players.filter(p=>!p.ai).length,ts:Date.now()});
   renderVsPanel&&tab==="vs"&&renderHub();}
 function lobbySnap(){
-  return {mode:LOBBY.mode,code:NET.code,players:LOBBY.players.map(p=>({pid:p.pid,name:p.name,side:p.side,ready:p.ready,ai:p.ai,pick:p.pick.slice(),cards:p.cards}))};
+  return {mode:LOBBY.mode,code:NET.code,players:LOBBY.players.map(p=>({pid:p.pid,name:p.name,side:p.side,ready:p.ready,ai:p.ai,pick:p.pick.slice(),cards:p.cards,loadout:p.loadout||{}}))};
 }
 function syncLobbyState(){
   if(!LOBBY)return;
   LOBBY.players.forEach(p=>{
-    if(p.pid===NET.pid||p.ai){
-      const lvl=p.ai?(LOBBY._aiLvl||6):avgTeamLvl();
-      p.cards=(p.pid===NET.pid?G.roster:[]).map(m=>cardBrief(m)).slice(0,12);
-      if(p.ai&&!p.cards.length)p.cards=aiRoster(lvl).map(m=>cardBrief(m));
-    }
+    if(p.pid===NET.pid)p.cards=competitionCards();
+    else if(p.ai&&!p.cards.length)p.cards=aiRoster(LOBBY._aiLvl||6).map(m=>cardBrief(m));
   });
 }
-function cardBrief(m){const c=byNum(m.num),st=statsOf(c,m.lvl);return {num:m.num,lvl:m.lvl,rar:c.rar,fac:c.fac,idn:c.idn,role:c.role,hp:st.hp,atk:st.atk,def:st.def,spd:st.spd};}
+function cardBrief(m){const c=byNum(m.num),st=LanglangRules.stats(c,30);return {num:m.num,lvl:30,rar:c.rar,fac:c.fac,idn:c.idn,role:c.role,hp:st.hp,atk:st.atk,def:st.def,spd:st.spd,public:LanglangRules.PUBLIC.includes(m.num)};}
+function competitionCards(){
+  const nums=[...new Set([...G.roster.map(m=>m.num),...LanglangRules.PUBLIC])];
+  return nums.filter(n=>byNum(n)).map(num=>cardBrief({num}));
+}
 function aiRoster(lvl){
   const pool=CARDS.filter(c=>c.rar==="R"||c.rar==="R2");
   const out=[];
-  for(let i=0;i<3;i++){const c=pool[Math.floor(Math.random()*pool.length)];out.push({num:c.num,lvl:Math.max(6,Math.min(30,lvl+Math.floor(Math.random()*3)))});}
+  for(let i=0;i<3;i++){const c=pool.splice(Math.floor(Math.random()*pool.length),1)[0];out.push({num:c.num,lvl:Math.max(6,Math.min(30,lvl+Math.floor(Math.random()*3)))});}
   return out;
 }
+function selectedCards(p){return [...new Set([...(p.pick||[]),...p.cards.map(c=>c.num)])].slice(0,3);}
 function onGuestLeave(c){
-  if(!LOBBY)return;
+  if(!LOBBY||B&&B.online&&B.over)return;
   const p=LOBBY.players.find(x=>x.pid===c.pid);
   if(!p)return;
+  if(B&&B.v3&&B.arena){v3Disconnect(c.pid);return;}
   if(B&&B.online){ // 战斗中掉线：其妖怪交给 AI
     toast(p.name+" 掉线，AI 接管");
     ["p","e"].forEach(side=>{
@@ -2055,6 +2218,8 @@ function onGuestLeave(c){
 }
 function onGuestMsg(c,d){
   if(!d||typeof d!=="object")return;
+  if(d.t==="v3resume"&&B&&B.v3&&B.arena&&B.arena.battle.players.some(p=>p.id===c.pid)){v3Reconnect(c.pid);v3Publish();return;}
+  if(d.t==="v3cmd"&&B&&B.v3){v3Command(c.pid,d.cmd,d.turn,d.phase);return;}
   if(d.t==="hello"){
     c.pid=d.pid;
     if(!LOBBY)return;
@@ -2065,16 +2230,34 @@ function onGuestMsg(c,d){
   }
   else if(d.t==="side"){const p=LOBBY&&LOBBY.players.find(x=>x.pid===c.pid);if(p){p.side=p.side===0?1:0;pushLobby();}}
   else if(d.t==="ready"){const p=LOBBY&&LOBBY.players.find(x=>x.pid===c.pid);if(p){p.ready=!!d.on;pushLobby();}}
-  else if(d.t==="pick"){const p=LOBBY&&LOBBY.players.find(x=>x.pid===c.pid);if(p){p.pick=(d.pick||[]).slice(0,3);pushLobby();}}
+  else if(d.t==="pick"){const p=LOBBY&&LOBBY.players.find(x=>x.pid===c.pid);if(p){p.pick=[...new Set((d.pick||[]).filter(n=>p.cards.some(cd=>cd.num===n)))].slice(0,3);p.ready=false;pushLobby();}}
+  else if(d.t==="loadout"){const p=LOBBY&&LOBBY.players.find(x=>x.pid===c.pid);if(p&&d.num&&p.cards.some(cd=>cd.num===d.num)){
+    const card=byNum(d.num),skills=d.skills,item=d.item||null;
+    try{LanglangRules.equippedSkills({...card,selectedSkills:skills},30,true);if(item&&!LanglangRules.ITEMS[item])return;
+      p.loadout=p.loadout||{};p.loadout[d.num]={skills:skills.slice(),item};p.ready=false;pushLobby();}catch(_){}
+  }}
   else if(d.t==="cmd"&&B&&B.online){netOnCmd(c.pid,d.cmd);}
 }
 function onHostMsg(d){
   if(!d||typeof d!=="object")return;
-  if(d.t==="lobby"){LOBBY=d.lobby;tab="vs";if(document.querySelector(".scr.on").id==="scr-hub")renderHub();else{enterHub();}return;}
+  if(d.t==="v3start"){v3StartGuest(d);return;}
+  if(d.t==="v3snap"){v3Receive(d);return;}
+  if(d.t==="v3end"){v3EndGuest(d);return;}
+  if(d.t==="lobby"){if(B&&B.v3)return;LOBBY=d.lobby;tab="vs";if(document.querySelector(".scr.on").id==="scr-hub")renderHub();else{enterHub();}return;}
   if(d.t==="full"){toast("房间已满，无法加入（稍后再试或另建房间）");netCleanup();tab="vs";enterHub();renderHub();return;}
   if(d.t==="note"){toast(d.txt);return;}
   if(d.t==="start"){netStartGuest(d);return;}
-  if(d.t==="snap"){NET.lastSnap=d.view;if(B&&B.online)renderNetBattle();return;}
+  if(d.t==="fx"){if(B&&B.online)playBattleEvent(d.event);return;}
+  if(d.t==="snap"){
+    NET.lastSnap=d.view;
+    if(B&&B.online){
+      clearTimeout(battleFxTimer);
+      const delay=Math.max(0,battleFxUntil-Date.now());
+      if(delay)battleFxTimer=setTimeout(()=>{if(B&&B.online&&NET.lastSnap)renderNetBattle();},delay);
+      else renderNetBattle();
+    }
+    return;
+  }
   if(d.t==="end"){netEndGuest(d);return;}
 }
 /* ---------- 大厅 UI ---------- */
@@ -2105,6 +2288,7 @@ function renderVs(body){
 }
 function renderVsPanel(body){
   body=body||$("#hub-body");
+  const previousScroll=body.scrollTop;
   const me=LOBBY.players.find(p=>p.pid===NET.pid);
   const isH=NET.isHost;
   const cnt=LOBBY.players.filter(p=>!p.ai).length;
@@ -2119,7 +2303,7 @@ function renderVsPanel(body){
         const mine=p.pid===NET.pid;
         h+=`<div class="vs-slot filled">
           <div class="who"><b>${p.name}${mine?' <span class="vs-me">(我)</span>':""}${p.ai?" 🤖":""}</b>
-          <small>${mine?"点击右侧按钮换边/准备":isH&&p.pid!==NET.pid?"房主可点其名换边":""} 携带 ${p.cards.length} 张</small></div>
+          <small>${mine?"已选 "+p.pick.length+"/3 · 不足自动补齐":isH&&p.pid!==NET.pid?"房主可点其名换边":""} · 可选 ${p.cards.length} 只</small></div>
           <span class="vs-ready ${p.ready||p.ai?"on":""}">${p.ai?"AI 已备":p.ready?"已准备":"未准备"}</span>
           ${mine?`<button class="btn btn-ghost vs-act" data-swap="${p.pid}">换边</button>`:""}
           ${isH&&!mine&&!p.ai?`<button class="btn btn-ghost vs-act" data-hswap="${p.pid}">移边</button>`:""}
@@ -2142,34 +2326,58 @@ function renderVsPanel(body){
       ${isH?`<button class="btn btn-gold vs-act" id="bt-vs-go" style="flex:1.4">开始对战</button>`:""}
       <button class="btn btn-ghost vs-act" id="bt-vs-leave">退出房间</button>
     </div>
-    <div class="netnote" style="margin-top:8px">开战条件：双方各至少 1 人且所有人类玩家均已准备。2v2 下每人从名册勾选 2 只出战。</div>
+    <div class="netnote" style="margin-top:8px">开战条件：双方各至少 1 人且所有人类玩家均已准备。每位玩家携带 3 只不同妖怪，未勾满时自动补齐。竞技等级统一为 30；公共池妖怪无需收服。</div>
   </div>
   ${LOBBY.players.map(p=>{
     const teamSide=p.side,mine=p.pid===NET.pid;
     const showDetail=mine||p.ai||((NET.isHost||true)&&(function(){const self=LOBBY.players.find(x=>x.pid===NET.pid);return self&&self.side===teamSide;})());
-    return `<div class="vs-room"><div class="ptitle">${p.name} 的卡组 ${mine?"（我的名册 · 点击勾选出战）":"（队友互通）"}</div>
-    ${p.cards.length?'<div class="vs-cards">'+p.cards.map((cd,i)=>`<div class="vs-card ${mine?"pick":""} ${p.pick.includes(cd.num)&&mine?"picked":""}" ${mine?`data-pick="${cd.num}"`:""}>
-      <img src="cards/${cd.num}.jpg" alt=""><small>Lv${cd.lvl} ${cd.role}</small>
-      <small>${cd.hp}/${cd.atk}/${cd.def}</small></div>`).join("")+'</div>':'<div class="dimtx" style="font-size:10.5px">尚未携带卡组</div>'}
+    return `<div class="vs-room"><div class="ptitle">${escapeHTML(p.name)} 的卡组 ${mine?"（个人名册＋公共池 · 点击勾选）":"（队友互通）"}</div>
+    ${mine?`<div class="vs-pickedbar" role="status">已选择 <b>${p.pick.length}/3</b>：${p.pick.length?p.pick.map(n=>escapeHTML(byNum(n)?.name||n)).join("、"):"点击卡牌选择妖怪"}<br>未选满会自动补齐</div>`:""}
+    ${p.cards.length?'<div class="vs-cards">'+p.cards.map((cd,i)=>{
+      const selected=p.pick.includes(cd.num)&&mine,name=byNum(cd.num).name,tag=mine?"button":"div";
+      return `<${tag} class="vs-card ${mine?"pick":""} ${selected?"picked":""}" ${mine?`type="button" data-pick="${cd.num}" aria-pressed="${!!selected}" aria-label="${escapeHTML(name)}${cd.public?'，公共妖怪':''}${selected?'，已选择':''}"`:""}>
+      <img src="cards/${cd.num}.jpg" alt=""><small>${escapeHTML(name)}</small><small>Lv${cd.lvl} ${cd.role}</small>
+      <small>${selected?"✓ 已选":cd.public?"公共":"个人"}</small></${tag}>`;
+    }).join("")+'</div>':'<div class="dimtx" style="font-size:10.5px">尚未携带卡组</div>'}
+    ${p.cards.length?`<div class="netnote" style="margin-top:8px"><b>开战队伍与携带道具（公开）</b><br>${selectedCards(p).map(n=>`${escapeHTML(byNum(n).name)} · ${escapeHTML(LanglangRules.ITEMS[p.loadout?.[n]?.item]?.name||"未携带")}`).join("<br>")}</div>`:""}
+    ${mine?selectedCards(p).map(n=>{
+      const card=byNum(n),loadout=p.loadout?.[n]||{skills:[0,1,2,3],item:null},pool=LanglangRules.skillPool(card);
+      return `<div class="panel" style="margin-top:8px;font-size:11px"><b>${escapeHTML(card.name)} · 竞技配置</b>
+        <div style="margin:6px 0"><label>携带道具 <select data-equip-item="${n}" ${p.ready?'disabled':''}><option value="">不携带</option>${Object.entries(LanglangRules.ITEMS).map(([id,it])=>`<option value="${id}" ${loadout.item===id?'selected':''}>${escapeHTML(it.name)} · ${escapeHTML(it.description)}</option>`).join("")}</select></label></div>
+        ${loadout.skills.map((idx,slot)=>`<div style="margin-top:5px"><label>技能 ${slot+1} <select data-equip-skill="${n}" data-slot="${slot}" ${p.ready?'disabled':''}>${pool.map((s,i)=>`<option value="${i}" ${idx===i?'selected':''}>${escapeHTML(s.name)} · PP ${s.pp}</option>`).join("")}</select></label></div>`).join("")}</div>`;
+    }).join(""):""}
     ${showDetail&&p.cards.length?`<div class="netnote" style="margin-top:6px">${p.cards.map(cd=>`${byNum(cd.num).name} Lv${cd.lvl} · HP${cd.hp} 攻${cd.atk} 防${cd.def} 速${cd.spd}`).join("<br>")}</div>`:""}
     </div>`;}).join("")}`;
-  body.innerHTML=h;
+  body.innerHTML=h;body.scrollTop=previousScroll;
   $$("[data-swap]").forEach(b=>b.addEventListener("click",()=>{const p=LOBBY.players.find(x=>x.pid===b.dataset.swap);p.side=p.side===0?1:0;if(NET.isHost)pushLobby();else sendTo(null,{t:"side"});}));
   $$("[data-hswap]").forEach(b=>b.addEventListener("click",()=>{const p=LOBBY.players.find(x=>x.pid===b.dataset.hswap);p.side=p.side===0?1:0;pushLobby();}));
   $$("[data-ai]").forEach(b=>b.addEventListener("click",()=>{
     const side=+b.dataset.ai;
-    LOBBY.players.push({pid:"ai"+side,name:"AI·替补",side,ready:true,ai:true,pick:[],cards:[]});
+    LOBBY.players.push({pid:"ai"+side+"-"+Math.random().toString(36).slice(2,10),name:"AI·替补",side,ready:true,ai:true,pick:[],cards:[]});
     pushLobby();
   }));
   $$("[data-pick]").forEach(b=>b.addEventListener("click",()=>{
     const me2=LOBBY.players.find(x=>x.pid===NET.pid);if(!me2)return;
-    const num=b.dataset.pick;
-    const cap=LOBBY.mode==="1v1"?3:2;
+    const num=b.dataset.pick;if(me2.ready){toast("请先取消准备再调整队伍");return;}
+    const cap=3;
     if(me2.pick.includes(num))me2.pick=me2.pick.filter(x=>x!==num);
-    else{if(me2.pick.length>=cap){toast(LOBBY.mode==="1v1"?"最多带 3 只":"2v2 每人最多带 2 只");return;}me2.pick.push(num);}
+    else{if(me2.pick.length>=cap){toast("每人最多带 3 只不同妖怪");return;}me2.pick.push(num);}
     if(NET.isHost)pushLobby();else sendTo(null,{t:"pick",pick:me2.pick});
-    renderVsPanel();
+    renderVsPanel();const focused=body.querySelector(`[data-pick="${num}"]`);if(focused)focused.focus({preventScroll:true});
   }));
+  function changeLoadout(num,update){
+    const p=LOBBY.players.find(x=>x.pid===NET.pid);if(!p||p.ready)return;
+    const current=p.loadout?.[num]||{skills:[0,1,2,3],item:null},next={skills:current.skills.slice(),item:current.item};
+    update(next);try{LanglangRules.equippedSkills({...byNum(num),selectedSkills:next.skills},30,true);}catch(_){toast("同一只妖怪的技能不能重复");renderVsPanel();return;}
+    p.loadout=p.loadout||{};p.loadout[num]=next;
+    if(NET.isHost)pushLobby();else sendTo(null,{t:"loadout",num,skills:next.skills,item:next.item});
+    renderVsPanel();
+  }
+  body.querySelectorAll('[data-equip-item]').forEach(el=>el.addEventListener('change',()=>changeLoadout(el.dataset.equipItem,x=>{x.item=el.value||null;})));
+  body.querySelectorAll('[data-equip-skill]').forEach(el=>el.addEventListener('change',()=>changeLoadout(el.dataset.equipSkill,x=>{
+    const slot=+el.dataset.slot,value=+el.value,other=x.skills.indexOf(value),previous=x.skills[slot];
+    if(other>=0&&other!==slot)x.skills[other]=previous;x.skills[slot]=value;
+  })));
   const bm=$("#bt-vs-mode");if(bm)bm.addEventListener("click",()=>{if(!NET.isHost){toast("只有房主能切换模式");return;}LOBBY.mode=LOBBY.mode==="1v1"?"2v2":"1v1";LOBBY.players.forEach(p=>{p.pick=[];});pushLobby();});
   const br=$("#bt-vs-ready");if(br)br.addEventListener("click",()=>{const me2=LOBBY.players.find(x=>x.pid===NET.pid);me2.ready=!me2.ready;if(NET.isHost)pushLobby();else sendTo(null,{t:"ready",on:me2.ready});});
   const bg=$("#bt-vs-go");if(bg)bg.addEventListener("click",()=>{
@@ -2187,30 +2395,34 @@ function renderVsPanel(body){
 /* ---------- 开战 ---------- */
 function battleMons(picks){
   return picks.map(pk=>{
-    const pk2=typeof pk==="string"?{num:pk,lvl:avgTeamLvl()}:pk;
-    return mkMon(pk2.num,pk2.lvl||6);
+    const num=typeof pk==="string"?pk:pk.num;
+    const mon=mkMon(num,30);mon.competitive=true;mon.hp=monStats(mon).hp;
+    return mon;
   });
 }
 function netStartHost(){
+  if(typeof v3StartHost==='function'){v3StartHost();return;}
   const per=LOBBY.mode==="2v2"?2:1;
+  const sides=[0,1].map(sd=>LOBBY.players.filter(p=>p.side===sd));
+  if(sides.some(ps=>ps.length!==per)){toast(per===2?"2v2 需要双方各两位玩家或 AI":"1v1 需要双方各一位玩家");return;}
+  const mk=list=>{
+    let mons=[],owners=[];
+    for(const p of list){
+      const selected=[...new Set([...(p.pick||[]),...p.cards.map(c=>c.num)])].slice(0,3);
+      const src=selected.map(num=>p.cards.find(c=>c.num===num)).filter(Boolean);
+      if(src.length!==3)return null;
+      src.forEach(pk=>{mons.push(battleMons([pk])[0]);owners.push(p.pid);});
+    }
+    return {mons,owners};
+  };
+  const A=mk(sides[0]),Bd=mk(sides[1]);
+  if(!A||!Bd){toast("每位玩家需要至少 3 只不同妖怪");return;}
   broadcast({t:"note",txt:"双方就绪，开战！"});
   LOBBY.players.forEach(p=>{
     if(p.ai)return;
     const c=NET.conns.find(x=>x.pid===p.pid);
     if(c&&c.open)c.send({t:"start",side:p.side,code:NET.code});
   });
-  const sides=[0,1].map(sd=>LOBBY.players.filter(p=>p.side===sd));
-  const mk=list=>{
-    let mons=[],owners=[];
-    list.forEach(p=>{
-      const src=(p.ai?p.cards.slice(0,per):(p.pick.length?p.pick:p.cards.slice(0,per)))
-        .map(pk=>typeof pk==="string"?{num:pk,lvl:avgTeamLvl()}:pk).slice(0,per);
-      src.forEach(pk=>{mons.push(battleMons([pk])[0]);owners.push(p.ai?"ai":p.pid);});
-    });
-    return {mons,owners};
-  };
-  const A=mk(sides[0]),Bd=mk(sides[1]);
-  if(!A.mons.length||!Bd.mons.length){toast("阵营编组失败");return;}
   startNetBattle(A,Bd,per);
 }
 function startNetBattle(A,Bd,per){
@@ -2287,17 +2499,20 @@ function netRoundBegin(){
   netFillAI();
   renderBattle();sendNetSnap();
 }
+function isAiOwner(owner){return owner==="ai"||!!(LOBBY&&LOBBY.players.some(p=>p.pid===owner&&p.ai));}
 function netFillAI(){
   ["p","e"].forEach(side=>{
     B.slots[side].forEach((ti,slot)=>{
-      const w=fieldWrap(side,slot);
-      if(B.owners[side][ti]!=="ai")return;
+      const owner=B.owners[side][ti];let w=fieldWrap(side,slot);
       if(w.mon.hp<=0){
-        const cand=benchOf(side,"ai");
-        if(cand.length){B.slots[side][slot]=cand[0];logLine("sys",slotLabel(side,slot)+" AI 换上了 "+byNum(fieldWrap(side,slot).mon.num).name+"！");}
-        return;
+        const cand=benchOf(side,owner);
+        if(isAiOwner(owner)&&cand.length){B.slots[side][slot]=cand[0];w=fieldWrap(side,slot);logLine("sys",slotLabel(side,slot)+" AI 换上了 "+byNum(w.mon.num).name+"！");}
+        else if(!cand.length){B.duelCmds[side][slot]={k:"done"};return;}
+        else return;
       }
-      if(!B.duelCmds[side][slot]){const i=netBestIdx(w);if(i>=0)B.duelCmds[side][slot]={k:"move",idx:i};}
+      if(isAiOwner(owner)&&!B.duelCmds[side][slot]){
+        const i=netBestIdx(w);B.duelCmds[side][slot]=i>=0?{k:"move",idx:i}:{k:"done"};
+      }
     });
   });
 }
@@ -2328,7 +2543,10 @@ function netOnCmd(pid,cmd){
   if(cmd.k==="burst"){
     const s=mySlot(pid);if(!s)return;
     const w=fieldWrap(s.side,s.slot);
-    if(!B.lock&&!w.awakened&&w.energy>=60)awaken(w,s.side==="p"?"player":"enemy").then(()=>{if(B){renderBattle();sendNetSnap();}});
+    if(!B.lock&&!B.duelCmds[s.side][s.slot]&&!w.awakened&&w.energy>=60){
+      const battle=B;B.lock=true;renderBattle();sendNetSnap();
+      awaken(w,s.side==="p"?"player":"enemy").finally(()=>{if(B===battle){B.lock=false;renderBattle();sendNetSnap();}});
+    }
     return;
   }
   // 倒地换人（等待替补阶段）
@@ -2353,12 +2571,19 @@ function netOnCmd(pid,cmd){
   const w=fieldWrap(s.side,s.slot);
   if(w.mon.hp<=0)return;
   if(cmd.k==="move"){
+    if(!Number.isInteger(cmd.idx))return;
     const mv=movesOf(byNum(w.mon.num))[cmd.idx];
     if(!mv||moveLock(w,mv,cmd.idx))return;
+    if(cmd.target!=null){
+      const foeSide=s.side==="p"?"e":"p";
+      if(mv.target==="self"||!Number.isInteger(cmd.target)||cmd.target<0||cmd.target>=B.slots[foeSide].length||fieldWrap(foeSide,cmd.target).mon.hp<=0)return;
+    }
   }else if(cmd.k==="pie"){if(!G.items.pie)return;}
-  else if(cmd.k!=="switch")return;
+  else if(cmd.k==="switch"){
+    if(!Number.isInteger(cmd.idx)||!benchOf(s.side,pid).includes(cmd.idx))return;
+  }else return;
   B.duelCmds[s.side][s.slot]=cmd;
-  sendNetSnap();
+  renderBattle();sendNetSnap();
   netMaybeResolve();
 }
 function netMaybeResolve(){
@@ -2397,7 +2622,7 @@ async function netResolveDuel(){
     const c=B.duelCmds[side][s];
     if(c&&c.k==="move"){
       const w=fieldWrap(side,s);
-      if(w.mon.hp>0)movers.push({w,side,idx:c.idx,spd:statsOf(byNum(w.mon.num),w.mon.lvl).spd*(w.spdMul||1)+Math.random()});
+      if(w.mon.hp>0)movers.push({w,side,idx:c.idx,target:c.target,spd:monStats(w.mon).spd*(w.spdMul||1)+Math.random()});
     }
   }
   movers.sort((x,y)=>y.spd-x.spd);
@@ -2406,8 +2631,8 @@ async function netResolveDuel(){
     if(m.w.mon.hp<=0)continue;
     if(skipStun(m.w)){await wait(420);if(!B)return;continue;}
     const foeSide=m.side==="p"?"e":"p";
-    let target=null;
-    for(const f of fieldList(foeSide)){if(f.wrap.mon.hp>0){target=f.wrap;break;}}
+    const foes=fieldList(foeSide);
+    let target=(foes.find(f=>f.slot===m.target&&f.wrap.mon.hp>0)||foes.find(f=>f.wrap.mon.hp>0)||{}).wrap;
     if(!target)break;
     await useMove(m.w,target,m.idx,m.side);
     if(!B)return;
@@ -2432,7 +2657,7 @@ async function netEndStepDuel(){
     const owner=B.owners[side][B.slots[side][s]];
     const cand=benchOf(side,owner);
     if(!cand.length)continue;
-    if(owner==="ai"){B.slots[side][s]=cand[0];logLine("sys",slotLabel(side,s)+" AI 换上了 "+byNum(fieldWrap(side,s).mon.num).name+"！");}
+    if(isAiOwner(owner)){B.slots[side][s]=cand[0];logLine("sys",slotLabel(side,s)+" AI 换上了 "+byNum(fieldWrap(side,s).mon.num).name+"！");}
     else B.duelForced[side][s]=true;
   }
   netCheckForcedDone();
@@ -2443,9 +2668,8 @@ function netCheckForcedDone(){
   else netRoundBegin();
 }
 function netFinish(hostWin){
-  B.over=true;B.lock=false;coachHide();sendNetSnap();
-  try{NET.conns.forEach(c=>c.close&&c.close());}catch(_){}
-  LOBBY=null;NET._done=true;
+  B.over=true;B.lock=false;coachHide();sendNetSnap();boardUnpublish(NET.code);
+  NET._done=true;
   const lines=[];let title,cls="";
   if(NET.isHost){
     title=hostWin?"胜利！":"败北…";cls=hostWin?"":"lose";
@@ -2485,21 +2709,21 @@ function buildSnapFor(player){
   const s=mySlot(player.pid);
   const listAll=side=>fieldList(side).map(f=>{
     const p=LOBBY.players.find(x=>x.pid===f.owner);
-    return {name:byNum(f.wrap.mon.num).name,owner:f.owner,ownerName:(p||{name:"AI·替补"}).name,
+    return {slot:f.slot,side:f.side,name:byNum(f.wrap.mon.num).name,owner:f.owner,ownerName:(p||{name:"AI·替补"}).name,
       chosen:!!B.duelCmds[f.side][f.slot],dead:f.wrap.mon.hp<=0,
       snap:snapWrapOf(f.wrap)};
   });
   const myField=s?mine:null;
   const myWrap=s?fieldWrap(mine,s.slot):null;
-  let partnerSnap=null,partnerName=null,partnerChosen=null;
-  if(s){for(const f of fieldList(mine)){if(f.slot!==s.slot){partnerSnap=snapWrapOf(f.wrap);partnerName=f.ownerName;partnerChosen=f.chosen;}}}
+  let partnerSnap=null,partnerName=null,partnerChosen=null,partnerSlot=null;
+  if(s){for(const f of fieldList(mine)){if(f.slot!==s.slot){partnerSnap=snapWrapOf(f.wrap);partnerName=(LOBBY.players.find(p=>p.pid===f.owner)||{name:"队友"}).name;partnerChosen=!!B.duelCmds[f.side][f.slot];partnerSlot=f.slot;}}}
   const forcedMine=s?B.duelForced[mine][s.slot]:false;
   const myCmd=s?B.duelCmds[mine][s.slot]:null;
   const bench=s?benchOf(mine,player.pid).map(ti=>{
     const w=(mine==="p"?B.pTeam:B.eTeam)[ti];
-    return {ti,num:w.num,name:byNum(w.mon.num).name,lvl:w.mon.lvl,hp:Math.max(0,w.mon.hp),maxHp:w.maxHp};
+    return {ti,num:w.mon.num,name:byNum(w.mon.num).name,lvl:w.mon.lvl,hp:Math.max(0,w.mon.hp),maxHp:w.maxHp};
   }):[];
-  const moves=(myWrap&&myWrap.mon.hp>0&&!forcedMine)?movesOf(byNum(myWrap.mon.num)).map((mv,i)=>({name:mv.name,type:mv.type,cat:mv.category,cost:mv.cost,pp:myWrap.mon.pp[i],maxpp:mv.pp,eff:mv.pow?effOf(mv.type,byNum(fieldWrap(foeS,0).mon.num).idn):1,icon:mv.icon,desc:mv.desc})):[];
+  const moves=(myWrap&&myWrap.mon.hp>0&&!forcedMine)?movesOf(byNum(myWrap.mon.num)).map((mv,i)=>({name:mv.name,type:mv.type,target:mv.target||"foe",cat:mv.category,cost:mv.cost,gain:mv.gain,lock:moveLock(myWrap,mv,i),pp:myWrap.mon.pp[i],maxpp:mv.pp,eff:mv.pow?effOf(mv.type,byNum(fieldWrap(foeS,0).mon.num).idn):1,icon:mv.icon,desc:mv.desc})):[];
   const foeSnap=listAll(foeS),meList=s?listAll(mine):[];
   const chosenList=[];
   meList.forEach(f=>chosenList.push({label:"你方·"+f.ownerName,chosen:f.chosen||f.dead}));
@@ -2510,7 +2734,7 @@ function buildSnapFor(player){
     waitTxt:!s?"观战中":B.lock?"回合结算中…":forcedMine?"请选择替补上场":"",
     log:B.msg.slice(-8),
     meSnap:s?snapWrapOf(myWrap):null,meName:myWrap?byNum(myWrap.mon.num).name:"",
-    partnerSnap,partnerName,partnerChosen,
+    partnerSnap,partnerName,partnerChosen,partnerSlot,mySlot:s?s.slot:null,
     foes:foeSnap,
     chosenList,
     energy:myWrap?myWrap.energy:0,awakened:myWrap?myWrap.awakened:false,
@@ -2519,48 +2743,85 @@ function buildSnapFor(player){
 }
 function renderNetBattle(view){
   const v=view||NET.lastSnap;if(!v)return;
-  const arena=$("#bt-arena");
-  const slotHTML=(snap,mine,ownerName)=>{
-    const dead=snap.hp<=0;
-    return `<div class="dslot ${mine?"me":""} ${dead?"dead":""}">
+  const arena=$("#bt-arena"),ownSide=v.mySide===0?"p":"e",foeSide=ownSide==="p"?"e":"p";
+  const choiceKey=v.turn+":"+(v.meSnap?v.meSnap.num:"");
+  if(NET.uiChoice&&NET.uiChoice.key!==choiceKey)NET.uiChoice=null;
+  if(NET.uiAction&&NET.uiAction.key!==choiceKey)NET.uiAction=null;
+  if(NET.uiBenchKey!==choiceKey){NET.uiBenchKey=choiceKey;NET.uiBenchOpen=false;}
+  let choice=NET.uiChoice;
+  if(v.mode==="fight"&&choice&&(!v.moves[choice.idx]||v.moves[choice.idx].lock)){NET.uiChoice=null;choice=null;}
+  const chosenMove=choice&&v.moves[choice.idx];
+  const needsFoe=!!(chosenMove&&chosenMove.target!=="self"),isFoeChoice=v.mode==="fight"&&needsFoe;
+  const livingFoes=v.foes.filter(f=>!f.dead&&f.snap.hp>0);
+  if(isFoeChoice&&livingFoes.length===1)choice.target=livingFoes[0].slot;
+  if(isFoeChoice&&choice.target!=null&&!livingFoes.some(f=>f.slot===choice.target))choice.target=null;
+  const selectedFoe=needsFoe&&choice.target!=null?v.foes.find(f=>f.slot===choice.target):null;
+  const targetName=chosenMove?(chosenMove.target==="self"?(v.meName||"自己"):(selectedFoe?selectedFoe.name:"请选择对手")):"未选择";
+  const slotHTML=(snap,mine,ownerName,side,slot)=>{
+    const dead=snap.hp<=0,available=isFoeChoice&&side===foeSide&&!dead;
+    const selected=!!(needsFoe&&choice.target===slot&&side===foeSide)||!!(chosenMove&&chosenMove.target==="self"&&mine&&(v.mode==="fight"||v.mode==="wait"));
+    return `<div class="dslot ${mine?"me":""} ${dead?"dead":""} ${available?"target-available":""} ${selected?"target-selected":""}" data-field="${side}-${slot}" ${available?`role="button" tabindex="0" aria-pressed="${!!selected}" aria-label="目标 ${escapeHTML(byNum(snap.num).name)}${selected?'，已选择':''}"`:""}>
       <img class="dcard" src="cards/${snap.num}.jpg" alt="">
-      <div class="dinfo">
-        <div class="dname">${byNum(snap.num).name} <span class="dimtx">Lv${snap.lvl}</span></div>
+      <div class="dinfo"><div class="dname">${escapeHTML(byNum(snap.num).name)} <span class="dimtx">Lv${snap.lvl}</span></div>
         <div class="bar hp ${hpBarCls(snap.hp,snap.maxHp)}"><i style="width:${Math.max(0,snap.hp/snap.maxHp*100)}%"></i></div>
         <div class="dsub">HP ${Math.max(0,snap.hp)}/${snap.maxHp} · 妖力 ${snap.energy}${snap.awakened?" · 已爆发":""}</div>
-        <div class="status-list">${statusHTML(fakeWrap(snap))}</div>
-        <div class="downer">${ownerName}</div>
-      </div>
-    </div>`;
+        <div class="status-list">${statusHTML(fakeWrap(snap))}</div><div class="downer">${escapeHTML(ownerName||"")}</div>
+        ${available?`<div class="target-label">${selected?"✓ 已选择目标":"点此选择目标"}</div>`:""}</div></div>`;
   };
-  const foeHtml=v.foes.map(f=>slotHTML(f.snap,false,f.ownerName)).join("");
-  const mineHtml=(v.partnerSnap?slotHTML(v.partnerSnap,false,v.partnerName||"队友"):"")+(v.meSnap?slotHTML(v.meSnap,true,"你"):v.meName?`<div class="dslot me"><div class="dinfo"><div class="dname">${v.meName}</div><div class="dsub">已倒地 · 无可用替补</div></div></div>`:"");
+  const foeHtml=v.foes.map(f=>slotHTML(f.snap,false,f.ownerName,foeSide,f.slot)).join("");
+  const mineHtml=(v.partnerSnap?slotHTML(v.partnerSnap,false,v.partnerName||"队友",ownSide,v.partnerSlot):"")+(v.meSnap?slotHTML(v.meSnap,true,"你",ownSide,v.mySlot):v.meName?`<div class="dslot me"><div class="dinfo"><div class="dname">${escapeHTML(v.meName)}</div><div class="dsub">已倒地 · 无可用替补</div></div></div>`:"");
   arena.innerHTML=`<div class="bt-hud"><span class="vn">${v.mySide===0?"蓝方":"红方"} · 在线对战</span><span class="tn">回合 ${v.turn}</span>
+    <button class="sound-toggle" id="bt-sound" aria-label="${soundMuted?"开启音效":"关闭音效"}">${soundMuted?"♪̸":"♪"}</button>
     <button class="mw" id="mini-wheel" title="身份克制盘 · 长按放大">${wheelSVG(false)}</button></div>
-    <div class="duel-row duel-foes">${foeHtml}</div>
-    <div class="duel-row duel-mine">${mineHtml}</div>`;
+    <div class="duel-row duel-foes">${foeHtml}</div><div class="duel-row duel-mine">${mineHtml}</div>`;
   bindWheel();
-  const menu=$("#bt-menu");
-  const logHtml=v.log.map(l=>logHTML(l)).join("");
-  const chosenHtml='<div class="pick-status">'+v.chosenList.map(c=>`<span class="ps-chip ${c.chosen?"on":""}">${c.label} ${c.chosen?"✓已选":"选择中"}</span>`).join("")+'</div>';
+  $("#bt-sound").addEventListener("click",e=>{soundMuted=!soundMuted;e.currentTarget.textContent=soundMuted?"♪̸":"♪";e.currentTarget.setAttribute("aria-label",soundMuted?"开启音效":"关闭音效");});
+  arena.querySelectorAll(".target-available").forEach(el=>{
+    const choose=()=>{if(!NET.uiChoice)return;NET.uiChoice.target=Number(el.dataset.field.split("-")[1]);renderNetBattle(v);$("#scr-battle").scrollTop=0;const selected=arena.querySelector(".target-selected[role=button]");if(selected)selected.focus({preventScroll:true});};
+    el.addEventListener("click",choose);el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();choose();}});
+  });
+  const menu=$("#bt-menu"),logHtml=v.log.map(l=>logHTML(l)).join("");
+  const chosenHtml='<div class="pick-status">'+v.chosenList.map(c=>`<span class="ps-chip ${c.chosen?"on":""}">${escapeHTML(c.label)} ${c.chosen?"✓已选":"选择中"}</span>`).join("")+'</div>';
   let ui="";
   if(v.mode==="over")ui='<div class="rm-wait">战斗结束</div>';
-  else if(v.mode==="forced")ui=`<div class="rm-wait">你的妖怪倒下了，请选择替补上场</div><div class="sublist">${v.bench.map(m=>`<button class="row" data-nsw="${m.ti}"><div class="pic"><img src="cards/${m.num}" alt=""></div><div class="inf"><div class="nm">${m.name} Lv${m.lvl}</div><div class="meta">体力 ${m.hp}/${m.maxHp}</div></div></button>`).join("")}</div>`;
-  else if(v.mode==="fight")ui=`
-    <div class="skill-grid">${v.moves.map((mv,i)=>`<button class="skill-card ${mv.eff>1?"eff-super":""}" data-nmv="${i}" ${mv.pp<=0||mv.cost>v.energy?"disabled":""} style="--flow:${IDENT[mv.type]?IDENT[mv.type].c:"#888"}">
-      <span class="skill-icon">${mv.icon}</span><span class="skill-info"><b>${mv.name}</b><span class="skill-type">${mv.cat}${mv.eff>1?" · 克制 +30%":""}</span><span class="skill-cost">${mv.cost?"妖力 −"+mv.cost:"妖力 +22"} · PP ${mv.pp}/${mv.maxpp}</span></span></button>`).join("")}
-    <button class="burst-button ${v.awakened?"activated":v.energy>=60?"ready":""}" id="bt-nburst" ${v.awakened||v.energy<60?"disabled":""}>
+  else if((v.mode==="fight"||v.mode==="forced")&&NET.uiAction&&NET.uiAction.sent)ui=`<div class="rm-wait">正在提交：${escapeHTML(NET.uiAction.text)}…</div>`;
+  else if(v.mode==="forced")ui=`<div class="rm-wait">你的妖怪倒下了，请选择替补上场</div><div class="sublist">${v.bench.map(m=>`<button class="row" data-nsw="${m.ti}"><div class="pic"><img src="cards/${m.num}.jpg" alt=""></div><div class="inf"><div class="nm">${escapeHTML(m.name)} Lv${m.lvl}</div><div class="meta">体力 ${m.hp}/${m.maxHp}</div></div></button>`).join("")}</div>`;
+  else if(v.mode==="fight"){
+    ui=`<div class="choice-panel" aria-live="polite">${chosenMove?`已选技能：<b>${escapeHTML(chosenMove.name)}</b> · 目标：<b>${escapeHTML(targetName)}</b>${isFoeChoice&&!selectedFoe?'<br>请点击上方一名亮框对手。':""}`:'第一步：选择下方可用技能。'}<div class="choice-actions"><button class="btn btn-gold choice-confirm" id="bt-nconfirm" ${!chosenMove||(isFoeChoice&&!selectedFoe)||choice.sent?"disabled":""}>${choice&&choice.sent?"正在提交…":"确认出招"}</button></div></div>
+    <div class="skill-grid">${v.moves.map((mv,i)=>{
+      const selected=!!choice&&choice.idx===i;
+      const eff=selectedFoe&&mv.type&&mv.cat!=="增益"?effOf(mv.type,byNum(selectedFoe.snap.num).idn):1;
+      return `<button class="skill-card ${eff>1?"eff-super":""} ${selected?"selected-skill":""}" data-nmv="${i}" aria-pressed="${selected}" ${mv.lock||choice&&choice.sent?"disabled":""} style="--flow:${IDENT[mv.type]?IDENT[mv.type].c:"#888"}">
+      <span class="skill-icon">${mv.icon}</span><span class="skill-info"><b>${escapeHTML(mv.name)}</b><span class="skill-type">${mv.cat}${eff>1?" · 克制 +30%":""}</span><span class="skill-desc">${escapeHTML(mv.desc||"")}</span><span class="skill-cost">${mv.lock||`${mv.cost?"妖力 −"+mv.cost:"妖力 +"+(mv.gain===undefined?22:mv.gain)} · PP ${mv.pp}/${mv.maxpp}`}</span><span class="skill-availability">${mv.lock?"不可用 · "+escapeHTML(mv.lock):selected?"✓ 已选择":"可选择"}</span></span></button>`;
+    }).join("")}</div>
+    <button class="burst-button ${v.awakened?"activated":v.energy>=60?"ready":""}" id="bt-nburst" ${v.awakened||v.energy<60||choice&&choice.sent?"disabled":""}>
       <span>✷ ${v.awakened?"战意已爆发":"战意爆发"}</span><small>${v.awakened?"生命上限 +50% · 高阶招式已解锁":`60 妖力 · 本场一次 · 生命上限 +50% (${v.energy}/60)`}</small></button>
-    <div class="backrow"><button id="bt-npie" ${G.items.pie<=0?"disabled":""}>🥮 烧饼 ×${G.items.pie}</button><span class="drag-note">全员选完统一结算</span></div>`;
-  else ui=`<div class="rm-wait">${v.waitTxt||"等待中…"}</div>`;
+    ${v.bench.length?`<details class="choice-panel" id="bench-picker" ${NET.uiBenchOpen?"open":""}><summary>替换妖怪 · 消耗本回合行动</summary><div class="sublist">${v.bench.map(m=>`<button class="row" data-nsw="${m.ti}" ${choice&&choice.sent?"disabled":""}><div class="pic"><img src="cards/${m.num}.jpg" alt=""></div><div class="inf"><div class="nm">换上 ${escapeHTML(m.name)} Lv${m.lvl}</div><div class="meta">体力 ${m.hp}/${m.maxHp}</div></div></button>`).join("")}</div></details>`:""}
+    <div class="backrow"><button id="bt-npie" ${G.items.pie<=0||choice&&choice.sent?"disabled":""}>🥮 烧饼 ×${G.items.pie}</button><span class="drag-note">全员选完统一结算</span></div>`;
+  }else ui=`<div class="rm-wait">${choice&&choice.sent&&chosenMove?`已提交 ${escapeHTML(chosenMove.name)} → ${escapeHTML(targetName)}<br>`:NET.uiAction&&NET.uiAction.sent?`已提交 ${escapeHTML(NET.uiAction.text)}<br>`:""}${escapeHTML(v.waitTxt||"等待中…")}</div>`;
   menu.innerHTML=`${chosenHtml}<div class="log-heading">战况速报</div><div class="bt-log" id="bt-log">${logHtml}</div>`+ui;
   const lg=$("#bt-log");if(lg)lg.scrollTop=lg.scrollHeight;
+  const benchPicker=$("#bench-picker");if(benchPicker)benchPicker.addEventListener("toggle",()=>{NET.uiBenchOpen=benchPicker.open;});
   const doCmd=cmd=>{if(NET.isHost)netOnCmd(NET.pid,cmd);else sendTo(null,{t:"cmd",cmd});};
-  $$("#bt-menu [data-nmv]").forEach(b=>b.addEventListener("click",()=>doCmd({k:"move",idx:+b.dataset.nmv})));
-  $$("#bt-menu [data-nsw]").forEach(b=>b.addEventListener("click",()=>doCmd({k:"switch",idx:+b.dataset.nsw})));
+  menu.querySelectorAll("[data-nmv]").forEach(b=>b.addEventListener("click",()=>{
+    const idx=+b.dataset.nmv,mv=v.moves[idx];if(!mv||mv.lock)return;
+    NET.uiAction=null;NET.uiChoice={key:choiceKey,idx,target:null,sent:false};renderNetBattle(v);$("#scr-battle").scrollTop=0;const selected=menu.querySelector(".selected-skill");if(selected)selected.focus({preventScroll:true});
+  }));
+  const confirm=$("#bt-nconfirm");if(confirm)confirm.addEventListener("click",()=>{
+    const c=NET.uiChoice;if(!c||c.sent)return;
+    const mv=v.moves[c.idx];if(!mv||mv.lock||(mv.target!=="self"&&c.target==null))return;
+    c.sent=true;const cmd={k:"move",idx:c.idx};if(mv.target!=="self")cmd.target=c.target;
+    doCmd(cmd);
+    if(!NET.isHost){const current=NET;renderNetBattle(v);setTimeout(()=>{if(NET===current&&NET.uiChoice===c&&NET.lastSnap&&NET.lastSnap.mode==="fight"){c.sent=false;renderNetBattle();toast("尚未收到房主确认，请重试");}},6000);}
+  });
+  menu.querySelectorAll("[data-nsw]").forEach(b=>b.addEventListener("click",()=>{
+    const idx=+b.dataset.nsw,mon=v.bench.find(m=>m.ti===idx);if(!mon||NET.uiAction&&NET.uiAction.sent)return;
+    NET.uiChoice=null;const action={key:choiceKey,text:"换上 "+mon.name,sent:true},current=NET;NET.uiAction=action;
+    doCmd({k:"switch",idx});
+    if(!NET.isHost){renderNetBattle(v);setTimeout(()=>{if(NET===current&&NET.uiAction===action&&NET.lastSnap&&NET.lastSnap.mode===v.mode){NET.uiAction=null;renderNetBattle();toast("尚未收到房主确认，请重试");}},6000);}
+  }));
   const np=$("#bt-npie");if(np)np.addEventListener("click",()=>doCmd({k:"pie"}));
-  const bb=$("#bt-nburst");
-  if(bb)bb.addEventListener("click",()=>doCmd({k:"burst"}));
+  const bb=$("#bt-nburst");if(bb)bb.addEventListener("click",()=>doCmd({k:"burst"}));
 }
 
 /* ---------- 启动 ---------- */
@@ -2569,5 +2830,9 @@ function renderNetBattle(view){
   if(g){$("#bt-continue").style.display="";G=g;}
 })();
 </script>
+<script src="game-engine-v3.js"></script>
+<script src="game-arena-v3.js"></script>
+<script src="game-arena-ui-v3.js"></script>
+<script src="game-solo-ui-v3.js"></script>
 </body>
 </html>

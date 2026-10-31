@@ -1,0 +1,160 @@
+const assert=require('node:assert/strict');
+const R=require('../game-rules-v3.js');
+const E=require('../game-engine-v3.js');
+const A=require('../game-arena-v3.js');
+const card=num=>({num,name:num,fac:'L',role:'输出'});
+const player=(id,side,nums)=>({id,side,cards:nums.map(card)});
+const teams=()=>[player('a',0,['003','001','070']),player('b',0,['071','002','030']),player('c',1,['068','019','047']),player('d',1,['069','013','014'])];
+assert.deepEqual(R.PUBLIC,['001','071','017','030','003','014','002','022']);
+assert.deepEqual(Object.keys(R.ITEMS).sort(),['clarity','guard','heart','speed']);
+for(const stats of Object.values(R.STATS))assert.equal(stats.reduce((a,b)=>a+b,0),900);
+assert.equal(R.effectiveness('mountain','water'),1.3);
+assert.equal(R.effectiveness('water','fire'),1.3);
+assert.equal(R.effectiveness('fire','mountain'),1.3);
+assert.equal(R.effectiveness('cave','mountain'),1);
+assert.equal(R.effectiveness('mountain','cave'),1);
+assert.equal(R.validateTeam(['001','001','003']),'小队中的妖怪不能重复');
+assert.throws(()=>E.createBattle([player('a',0,['003','003','070']),player('c',1,['068','019','047'])]));
+assert.throws(()=>R.equippedSkills({...card('003'),selectedSkills:[0,1,2,4]},6,false));
+assert.equal(R.equippedSkills({...card('003'),selectedSkills:[0,1,2,4]},6,true)[3].name,'火云突袭');
+let b=E.createBattle(teams(),{now:1000});
+assert.equal(E.select(b,'a',{kind:'move',index:0,target:'c'}),true);
+assert.equal(E.select(b,'b',{kind:'move',index:0,target:'c'}),true);
+b.players[2].team[0].hp=1;
+E.timeout(b);
+const events=E.resolve(b,()=>.5);
+assert(events.some(e=>e.kind==='hit'&&e.actor==='b'&&e.target==='d'),'击败目标后自动转向');
+assert.equal(b.phase,'replace');
+assert.equal(E.replace(b,'c',1),true);
+assert.equal(b.phase,'select');
+b=E.createBattle(teams(),{now:1000});
+assert.equal(E.select(b,'a',{kind:'switch',index:1}),true);
+assert.equal(E.select(b,'c',{kind:'move',index:0,target:'a'}),true);
+E.timeout(b);
+E.resolve(b,()=>.5);
+assert.equal(b.players[0].active,1);
+assert(b.players[0].team[1].hp<b.players[0].team[1].stats.hp,'换人先于攻击，攻击落在替补身上');
+b=E.createBattle(teams(),{now:1000});
+const a=b.players[0];a.team[0].pp.fill(0);
+assert.equal(E.defaultCommand(a).kind,'struggle');
+assert.equal(E.select(b,'a',{kind:'struggle'}),true);
+E.timeout(b);const before=a.team[0].hp;E.resolve(b,()=>.5);assert(a.team[0].hp<before,'奋力一击造成反作用伤害');
+b=E.createBattle(teams(),{now:1000});
+assert.equal(E.disconnect(b,'a',11000),true);
+assert.equal(E.tick(b,50000),'paused');
+assert.equal(E.select(b,'b',{kind:'move',index:0,target:'c'}),false);
+assert.equal(E.reconnect(b,'a',60000),true);
+assert.equal(b.clock.deadline,110000,'暂停期间保留剩余选招时间');
+assert.equal(E.tick(b,110000),'timeout');
+assert.equal(E.isReady(b),true);
+b=E.createBattle(teams(),{now:1000});E.disconnect(b,'c',2000);
+assert.equal(E.tick(b,62000),'forfeit');assert.equal(b.winner,0);
+const snapshot=JSON.parse(JSON.stringify(b));
+assert.equal(snapshot.phase,'over');
+assert.equal(snapshot.winner,0);
+// 倒下后的等待限时适用于双方，且暂停时不消耗选择时间。
+b=E.createBattle(teams(),{now:1000});
+b.players[0].team[0].hp=0;b.players[2].team[0].hp=0;b.phase='replace';b.clock.deadline=61000;
+assert.equal(E.disconnect(b,'b',11000),true);assert.equal(E.tick(b,70000),'paused');
+assert.equal(E.reconnect(b,'b',70000),true);assert.equal(b.clock.deadline,120000);
+assert.equal(E.tick(b,120000),'replacement_timeout');assert.equal(b.phase,'select');
+assert.equal(b.players[0].active,1);assert.equal(b.players[2].active,1);
+// 竞技道具免费且每场独立重置：护身佩只抵挡一次，护心果按体力阈值触发。
+let itemTeams=teams();itemTeams[0].cards[0].item='heart';itemTeams[2].cards[0].item='guard';
+b=E.createBattle(itemTeams,{now:0});
+b.players[0].team[0].hp=Math.floor(b.players[0].team[0].stats.hp/2)+1;
+assert(E.select(b,'c',{kind:'move',index:0,target:'a'}));
+assert(E.select(b,'a',{kind:'move',index:0,target:'c'}));E.timeout(b);
+let itemEvents=E.resolve(b,()=>.5,1000);
+assert(itemEvents.some(e=>e.kind==='item'&&e.item==='heart'));
+assert(itemEvents.some(e=>e.kind==='item'&&e.item==='guard'));
+assert(b.players[0].team[0].itemUsed&&b.players[2].team[0].itemUsed);
+assert.equal(E.createBattle(itemTeams,{now:0}).players[0].team[0].itemUsed,false);
+itemTeams=teams();itemTeams[0].cards[0].item='bad';
+assert.throws(()=>E.createBattle(itemTeams),/未知竞技道具/);
+const drawCards=[{num:'a',rar:'R2'},{num:'b',rar:'R'},{num:'c',rar:'R'},{num:'d',rar:'S'}];
+for(const rand of [()=>0,()=>.99]){
+  const drawn=R.drawStarter(drawCards,rand);
+  assert.equal(new Set(drawn).size,3);
+  assert.notEqual(drawCards.find(c=>c.num===drawn[0]).rar,'R');
+}
+assert.equal(R.catchChance(0,100,'R'),0);
+assert(R.catchChance(10,100,'R')>R.catchChance(80,100,'R'));
+assert(R.catchChance(10,100,'R')>R.catchChance(10,100,'U'));
+const roam=[{num:'046',fac:'G',rar:'R2'},{num:'003',fac:'G',rar:'U'},{num:'013',fac:'G',rar:'S'}];
+assert.equal(R.chooseEncounter(roam,'fire',0,()=>.99).num,'046');
+assert.equal(R.chooseEncounter(roam,'fire',10,()=>.999).num,'003');
+assert.equal(R.chooseEncounter(roam,'water',0),null);
+// 巡山允许较小队伍，成功收服立即结束，失败则仍由对手行动。
+const solo=()=>E.createBattle([player('you',0,['003']),player('wild',1,['017'])],{competitive:false,allowItems:true,canCatch:true,level:6,now:0});
+let walk=solo();assert(E.select(walk,'you',{kind:'item',item:'gourd'}));E.timeout(walk);
+assert(E.resolve(walk,()=>0,1000).some(e=>e.kind==='catch'));assert.equal(walk.captured.num,'017');assert.equal(walk.phase,'over');
+walk=solo();assert(E.select(walk,'you',{kind:'item',item:'gourd'}));E.timeout(walk);
+let walkEvents=E.resolve(walk,()=>.99,1000);assert(walkEvents.some(e=>e.kind==='catch_failed'));
+assert(walkEvents.some(e=>e.kind==='hit'&&e.actor==='wild'),'收服失败后敌方仍行动');
+walk=solo();walk.players[0].team[0].hp=10;assert(E.select(walk,'you',{kind:'item',item:'pie'}));E.timeout(walk);
+assert(E.resolve(walk,()=>.5,1000).some(e=>e.kind==='heal'));
+assert.equal(E.select(E.createBattle(teams()),'a',{kind:'item',item:'pie'}),false,'竞技不能使用消耗道具');
+
+const overlap=teams();overlap[1].cards[0]=card('003');
+assert.doesNotThrow(()=>E.createBattle(overlap),'不同队友可携带相同妖怪');
+const S=require('../game-save-v3.js');
+const saveCards=[{num:'001',rar:'U',power:10020,fac:'L',role:'防御'},{num:'003',rar:'U',power:9680,fac:'G',role:'输出'},{num:'070',rar:'R',power:6270,fac:'L',role:'输出'}];
+const old={coin:420,items:{gourd:2},roster:[{id:1,num:'001',lvl:6,exp:12,hp:600},{id:2,num:'001',lvl:7,exp:0,hp:650},{id:3,num:'070',lvl:5,exp:2,hp:400}],team:[1,2,3],cleared:[0,1]};
+const oldText=JSON.stringify(old),saved={lls_save_v2:oldText};
+const storage={getItem:k=>saved[k]||null,setItem:(k,v)=>saved[k]=v};
+const migrated=S.load(storage,saveCards);
+assert.equal(saved.lls_save_v2,oldText,'迁移时不覆盖旧存档');
+assert.equal(migrated.roster.length,3,'重复妖怪仍保留在名册');
+assert.deepEqual(migrated.team,[1,3]);
+assert.equal(migrated.coin,420);
+assert.deepEqual(migrated.cleared,[0,1]);
+S.save(storage,migrated);
+assert.equal(saved.lls_save_v2,oldText);
+assert.equal(JSON.parse(saved.lls_save_v3).version,3);
+assert.throws(()=>S.migrate({...old,roster:[{id:1,num:'999',lvl:2}]},saveCards));
+const fresh=S.fresh(saveCards,()=>0);
+assert.equal(new Set(fresh.roster.map(m=>m.num)).size,3);
+assert.notEqual(saveCards.find(c=>c.num===fresh.roster[0].num).rar,'R');
+
+assert.throws(()=>S.setTeam(migrated,[1,2,3]),/不同/);
+const joined=S.addCaught(migrated,saveCards[1],5);
+assert.equal(joined.roster.length,4);
+assert.equal(migrated.roster.length,3,'收服不更改原存档对象');
+const duplicate=S.addCaught(joined,saveCards[1],5);
+assert.equal(duplicate.roster.length,4);assert.equal(duplicate.items.expFruit,1);
+assert.equal(joined.items.expFruit,0,'重复收服不更改原存档');
+const fed=S.useExperienceFruit(duplicate,4,saveCards);
+assert.equal(fed.state.items.expFruit,0);assert.equal(fed.state.roster.find(m=>m.id===4).exp,60);
+assert.throws(()=>S.useExperienceFruit(fed.state,4,saveCards),/经验果不足/);
+assert.equal(S.setTeam(joined,[1,3,4]).team.length,3);
+assert.throws(()=>S.equip(joined,4,[0,1,2,4],saveCards),/技能配置/);
+const victory=S.awardVictory(S.setTeam(joined,[1,3,4]),saveCards,15);
+assert.equal(victory.changes.length,3);
+assert(victory.changes.every(c=>c.to>=c.from));
+assert.throws(()=>S.awardVictory(joined,saveCards,NaN));
+
+// 调度器只接受玩家自己的行动，等待全部提交，并隐藏其他玩家的选招。
+const competitors=teams();competitors[1].ai=true;competitors[3].ai=true;
+let arena=A.create(competitors,1000);A.advance(arena,1000,()=>.5);
+assert.equal(A.command(arena,'b',{kind:'move',index:0,target:'c'},1000,()=>.5),false);
+assert.equal(A.command(arena,'a',{kind:'move',index:1,target:'c'},1000,()=>.5),true);
+assert.deepEqual(A.view(arena,'c').battle.commands.a,{submitted:true});
+assert.throws(()=>A.view(arena,'outsider'),/玩家不在/);
+assert.equal(A.command(arena,'c',{kind:'move',index:0,target:'a'},1000,()=>.5),true);
+assert.equal(arena.battle.turn,2);assert.equal(arena.history.length,1);
+assert.equal(A.disconnect(arena,'c',2000),true);
+assert.equal(A.tick(arena,61999,()=>.5),'paused');
+assert.equal(A.tick(arena,62000,()=>.5),'forfeit');
+assert.equal(arena.battle.winner,0);
+// 自动对局应在有限回合内结束，且血量始终在合理范围内。
+for(let match=0;match<20;match++){
+  arena=A.create(teams().map(p=>({...p,ai:true})),0);
+  for(let n=0;n<250&&arena.battle.phase!=='over';n++){
+    A.advance(arena,n*1000,Math.random);
+    for(const p of arena.battle.players)for(const m of p.team)assert(m.hp>=0&&m.hp<=m.stats.hp);
+  }
+  assert.equal(arena.battle.phase,'over','自动对局不应无限循环');
+}
+
+console.log('v3 规则与存档检查通过');
