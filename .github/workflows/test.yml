@@ -1,0 +1,19 @@
+name: Test game
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  game-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run rules and save tests
+        run: node tests/game-v3.test.cjs
+      - name: Rebuild single-file version
+        run: python3 build_singlefile.py
+      - name: Check generated file and whitespace
+        run: |
+          git diff --exit-code -- '浪浪山单文件版.html'
+          git diff --check
