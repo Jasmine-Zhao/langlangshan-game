@@ -158,3 +158,34 @@ for(let match=0;match<20;match++){
 }
 
 console.log('v3 规则与存档检查通过');
+
+// 特效计划：把引擎事件按原顺序转成表演步骤，并携带伤害与目标定位信息。
+const FX=require('../game-fx-v3.js');
+{
+  const fx_teams=teams();
+  const fb=E.createBattle(fx_teams,{now:1000,competitive:false});
+  const b0=fb.players[0],c0=fb.players[2];
+  fb.events.length=0;
+  fb.events.push({kind:'switch',player:'a',num:'001'});
+  fb.events.push({kind:'hit',actor:'a',target:'c',skill:'火尖枪',damage:42,effectiveness:1.3});
+  fb.events.push({kind:'hit',actor:'a',target:'d',skill:'烈焰燎原',damage:30,effectiveness:1});
+  fb.events.push({kind:'miss',actor:'c',target:'a',skill:'水枪偷袭'});
+  fb.events.push({kind:'effect',actor:'野生妖怪',actorId:'c',target:'你',targetId:'a',effect:'atkDown'});
+  fb.events.push({kind:'status',player:'a',effect:'burn',damage:15});
+  fb.events.push({kind:'item',target:'你',targetId:'a',item:'clarity'});
+  fb.events.push({kind:'heal',player:'a',healed:50});
+  fb.events.push({kind:'catch_failed',num:'068'});
+  const steps=FX.plan(fb,fb.events);
+  assert.deepEqual(steps.map(s=>s.type),['switch','hit','hit','miss','effect','status','item','heal','catch_failed']);
+  const hits=steps.filter(s=>s.type==='hit');
+  assert.equal(hits[0].superEffective,true,'克制命中应标记');
+  assert.equal(hits[1].superEffective,false);
+  assert.deepEqual(hits.map(s=>s.target),['c','d'],'2v2 多目标按结算顺序逐个表演');
+  assert.equal(hits[0].color,FX.COLORS.fire,'弹道颜色来自出招者当前妖怪属性');
+  assert.equal(hits[0].pending,42,'pending 为该目标剩余总伤害，供血条分段回落');
+  assert.equal(steps.find(s=>s.type==='status').pending,15);
+  assert.equal(steps.find(s=>s.type==='effect').target,'a','效果事件应携带目标玩家 ID');
+  assert.equal(steps.find(s=>s.type==='effect').buff,false);
+  assert.equal(FX.plan(fb,[]).length,0);
+  assert.equal(FX.plan(fb).length,0,'事件缺失时应返回空计划');
+}

@@ -62,7 +62,7 @@
     for(const p of b.players)if(living(active(p))&&!b.commands[p.id])b.commands[p.id]=defaultCommand(p);
   }
   function isReady(b){return b.phase==='select'&&b.players.every(p=>!living(active(p))||!!b.commands[p.id]);}
-  function effect(b,actor,target,key,rng){
+  function effect(b,actor,target,targetPlayer,key,rng){
     if(!key||!living(target))return;
     if(key==='burnChance'||key==='poisonChance'||key==='accuracyChance'){
       if(rng()>=.3)return;
@@ -70,7 +70,7 @@
     }
     if(key==='burn'||key==='poison'){
       target.status[key]=3;
-      if(target.item==='clarity'&&!target.itemUsed){delete target.status[key];target.itemUsed=true;b.events.push({kind:'item',target:target.name,item:'clarity'});}
+      if(target.item==='clarity'&&!target.itemUsed){delete target.status[key];target.itemUsed=true;b.events.push({kind:'item',target:target.name,targetId:targetPlayer?targetPlayer.id:null,item:'clarity'});}
     }
     else if(key==='shield')target.shield=1;
     else if(key==='heal')target.hp=Math.min(target.stats.hp,target.hp+Math.max(1,Math.floor(target.stats.hp*.3)));
@@ -79,7 +79,7 @@
       const changes={defUp:['def',1],atkUp:['atk',1],speedUp:['spd',1],evadeUp:['evade',1],atkDown:['atk',-1],speedDown:['spd',-1],accuracyDown:['accuracy',-1]};
       const c=changes[key];if(c){target.mod[c[0]]=clamp(target.mod[c[0]]+c[1],-3,3);target.modTurns[c[0]]=3;}
     }
-    b.events.push({kind:'effect',actor:actor.name,target:target.name,effect:key});
+    b.events.push({kind:'effect',actor:actor.name,actorId:actor.id,target:target.name,targetId:targetPlayer?targetPlayer.id:null,effect:key});
   }
   function execute(b,p,cmd,rng){
     const actor=active(p);if(!living(actor))return;
@@ -107,7 +107,7 @@
         t.hp=Math.max(0,t.hp-damage);b.events.push({kind:'hit',actor:p.id,target:q.id,skill:skill.name,damage,effectiveness});
         healItem(b,q);
       }
-      effect(b,actor,t,skill.effect,rng);
+      effect(b,actor,t,q,skill.effect,rng);
     }
     if(cmd.kind==='struggle'){actor.hp=Math.max(0,actor.hp-Math.max(1,Math.floor(actor.stats.hp*.1)));healItem(b,p);}
   }

@@ -160,18 +160,19 @@ function v3Render(view){
   const canTarget=b.phase==='select'&&!b.commands[me.id]&&!paused&&!!skill&&(targetType==='foe'||targetType==='ally');
   const playerLabel=p=>p.id===me.id?'你':p.side===me.side?`队友${mine.length>1?' '+(mine.indexOf(p)+1):''}`:`对手 ${foes.indexOf(p)+1}`;
   const slot=p=>{const m=active(p),targetable=canTarget&&eligible.includes(p)&&m.hp>0,selected=targetable&&choice.target===p.id;
-    return `<div class="dslot ${p.id===me.id?'me':''} ${m.hp<=0?'dead':''} ${targetable?'target-available':''} ${selected?'target-selected':''}" data-v3player="${escapeHTML(p.id)}" ${targetable?`data-v3target="${escapeHTML(p.id)}" role="button" tabindex="0" aria-pressed="${selected}"`:''}>
+    return `<div class="dslot ${p.id===me.id?'me':''} ${m.hp<=0?'dead':''} ${targetable?'target-available':''} ${selected?'target-selected':''}" data-v3player="${escapeHTML(p.id)}" data-v3hp="${m.hp}" data-v3max="${m.stats.hp}" ${targetable?`data-v3target="${escapeHTML(p.id)}" role="button" tabindex="0" aria-pressed="${selected}"`:''}>
       <img class="dcard" src="cards/${m.num}.jpg" alt=""><div class="dinfo"><div class="dname">${escapeHTML(m.name)} · ${LanglangRules.TYPES[m.type]}</div>
       <div class="bar hp ${hpBarCls(m.hp,m.stats.hp)}"><i style="width:${Math.max(0,m.hp/m.stats.hp*100)}%"></i></div>
       <div class="dsub">HP ${m.hp}/${m.stats.hp} · Lv${m.level}</div><div class="downer">${playerLabel(p)} · ${escapeHTML(p.name)} · ${escapeHTML(LanglangRules.ITEMS[m.item]?.name||'无道具')}${m.itemUsed?'（已触发）':''}</div>
       ${targetable?`<div class="target-label">${selected?'✓ 已选目标':'点击选择目标'}</div>`:''}</div></div>`;};
   const arena=$('#bt-arena');arena.innerHTML=`<div class="bt-hud"><span class="vn">${me.side===0?'蓝方':'红方'} · 竞技对战</span><span class="tn">回合 ${b.turn}</span><span id="v3-clock"></span></div><div class="duel-row duel-foes">${foes.map(slot).join('')}</div><div class="duel-row duel-mine">${mine.map(slot).join('')}</div>`;
   const last=view.history[view.history.length-1];
+  // 每次重渲染都会打断上一段表演；新回合的事件按顺序播放，不阻塞选招操作。
+  if(NET._v3fxToken)NET._v3fxToken.cancelled=true;
   if(last&&NET._v3animTurn!==last.turn){
     NET._v3animTurn=last.turn;
-    for(const event of last.events)if(event.kind==='hit'){
-      arena.querySelectorAll('[data-v3player]').forEach(el=>{if(el.dataset.v3player===event.actor)el.classList.add('v3-actor');if(el.dataset.v3player===event.target)el.classList.add('v3-hit');});
-    }
+    const token={cancelled:false};NET._v3fxToken=token;
+    try{LanglangFX.play(arena,LanglangFX.plan(b,last.events),{token});}catch(_){}
   }
   arena.querySelectorAll('[data-v3target]').forEach(el=>{
     const choose=()=>{choice.target=el.dataset.v3target;v3Render(view);$('#scr-battle').scrollTop=0;};el.addEventListener('click',choose);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();choose();}});

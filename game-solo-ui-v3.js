@@ -12,26 +12,37 @@ function v3StartSolo(stage,stageId,team){
     B={v3solo:true,online:false,battle,stage,stageId,wild:stage.wild,tutorial:stageId==='tut',pTeam:team.map(wrap),eTeam:stage.foes.map(makeFoe).map(wrap),over:false,history:[],choice:null};
     coachHide();scr('battle');v3SoloRender();
     B.timer=setInterval(()=>{
-      if(!B||!B.v3solo||B.over||B.tutorial)return;
+      if(!B||!B.v3solo||B.over||B.tutorial||B.fx)return;
       const result=LanglangBattle.tick(B.battle);
       if(result==='timeout'||result==='replacement_timeout')v3SoloAdvance();else v3SoloClock();
     },1000);
   }catch(e){toast('无法开始巡山：'+e.message);}
 }
 function v3SoloClock(){const el=$('#solo-clock');if(el&&B&&B.v3solo)el.textContent=B.tutorial?'入门试炼':`剩余 ${Math.max(0,Math.ceil((B.battle.clock.deadline-Date.now())/1000))} 秒`;}
-function v3SoloAdvance(){
+async function v3SoloAdvance(){
   if(!B||!B.v3solo||B.over)return;
   const battle=B.battle,enemy=battle.players[1],self=battle.players[0];
+  let fxEvents=null,fxOver=false;
   if(battle.phase==='replace'&&LanglangBattle.active(enemy).hp<=0){const i=enemy.team.findIndex(m=>m.hp>0);if(i>=0)LanglangBattle.replace(battle,enemy.id,i);}
   if(battle.phase==='select'&&LanglangBattle.active(enemy).hp>0&&!battle.commands[enemy.id])LanglangBattle.select(battle,enemy.id,LanglangBattle.defaultCommand(enemy));
   if(LanglangBattle.isReady(battle)){
     const turn=battle.turn,events=LanglangBattle.resolve(battle);
     B.history.push({turn,events});B.history=B.history.slice(-4);B.choice=null;
     v3SyncSolo();
-    if(battle.phase==='over'){v3SoloFinish();return;}
-    if(battle.phase==='replace'&&LanglangBattle.active(enemy).hp<=0){const i=enemy.team.findIndex(m=>m.hp>0);if(i>=0)LanglangBattle.replace(battle,enemy.id,i);}
+    if(battle.phase==='over')fxOver=true;
+    else if(battle.phase==='replace'&&LanglangBattle.active(enemy).hp<=0){const i=enemy.team.findIndex(m=>m.hp>0);if(i>=0)LanglangBattle.replace(battle,enemy.id,i);}
+    if(events.length)fxEvents=events;
   }
   v3SoloRender();
+  // 表演期间锁定输入，避免重渲染打断；战斗结束时先播完击倒再弹结算。
+  if(fxEvents)await v3SoloPlayFx(fxEvents);
+  if(fxOver)v3SoloFinish();
+}
+async function v3SoloPlayFx(events){
+  const arena=$('#bt-arena');if(!arena||!B||!B.v3solo)return;
+  const token={cancelled:false};B.fxToken=token;B.fx=true;
+  try{await LanglangFX.play(arena,LanglangFX.plan(B.battle,events),{token});}catch(_){}
+  if(B&&B.fxToken===token){B.fx=false;B.fxToken=null;}
 }
 function v3SyncSolo(){
   if(!B||!B.v3solo)return;
@@ -53,7 +64,7 @@ function v3SoloFinish(){
   }else finishBattle({kind:battle.winner===0?'win':'lose'});
 }
 function v3SoloCommand(cmd){
-  if(!B||!B.v3solo||B.over)return;
+  if(!B||!B.v3solo||B.over||B.fx)return;
   const battle=B.battle;
   if(cmd.kind==='replace'){
     if(LanglangBattle.replace(battle,'you',cmd.index)){B.choice=null;v3SoloAdvance();}return;
@@ -73,10 +84,8 @@ function v3SoloRender(){
   const battle=B.battle,me=battle.players[0],foe=battle.players[1],m=LanglangBattle.active(me),enemy=LanglangBattle.active(foe),key=`${battle.turn}:${battle.phase}:${m.num}`;
   if(!B.choice||B.choice.key!==key)B.choice={key,index:null};
   const choice=B.choice,skill=choice.index===null?null:m.skills[choice.index];
-  const slot=(p,cls)=>{const x=LanglangBattle.active(p);return `<div class="dslot ${cls}" data-v3player="${p.id}"><img class="dcard" src="cards/${x.num}.jpg" alt=""><div class="dinfo"><div class="dname">${escapeHTML(x.name)} · ${LanglangRules.TYPES[x.type]}</div><div class="bar hp ${hpBarCls(x.hp,x.stats.hp)}"><i style="width:${x.hp/x.stats.hp*100}%"></i></div><div class="dsub">HP ${x.hp}/${x.stats.hp} · Lv${x.level}</div><div class="downer">${escapeHTML(p.name)}${Object.keys(x.status).length?' · '+Object.keys(x.status).map(k=>k==='burn'?'灼烧':'中毒').join('、'):''}</div></div></div>`;};
+  const slot=(p,cls)=>{const x=LanglangBattle.active(p);return `<div class="dslot ${cls}" data-v3player="${p.id}" data-v3hp="${x.hp}" data-v3max="${x.stats.hp}"><img class="dcard" src="cards/${x.num}.jpg" alt=""><div class="dinfo"><div class="dname">${escapeHTML(x.name)} · ${LanglangRules.TYPES[x.type]}</div><div class="bar hp ${hpBarCls(x.hp,x.stats.hp)}"><i style="width:${x.hp/x.stats.hp*100}%"></i></div><div class="dsub">HP ${x.hp}/${x.stats.hp} · Lv${x.level}</div><div class="downer">${escapeHTML(p.name)}${Object.keys(x.status).length?' · '+Object.keys(x.status).map(k=>k==='burn'?'灼烧':'中毒').join('、'):''}</div></div></div>`;};
   const arena=$('#bt-arena');arena.innerHTML=`<div class="bt-hud"><span class="vn">${escapeHTML(B.stage.name)}</span><span class="tn">回合 ${battle.turn}</span><span id="solo-clock"></span></div><div class="duel-row duel-foes">${slot(foe,'')}</div><div class="duel-row duel-mine">${slot(me,'me')}</div>`;
-  const last=B.history[B.history.length-1];
-  if(last&&B.animTurn!==last.turn){B.animTurn=last.turn;for(const e of last.events)if(e.kind==='hit')arena.querySelectorAll('[data-v3player]').forEach(el=>{if(el.dataset.v3player===e.actor)el.classList.add('v3-actor');if(el.dataset.v3player===e.target)el.classList.add('v3-hit');});}
   const eventText=e=>{
     if(e.kind==='catch_failed')return '野生妖怪挣脱了葫芦，战斗继续。';
     if(e.kind==='heal')return `疗伤烧饼恢复 ${e.healed} 体力。`;
@@ -102,13 +111,13 @@ function v3SoloRender(){
       ${B.wild?'<button class="btn btn-ghost" id="solo-run">离开巡山</button>':''}`;
   }
   const menu=$('#bt-menu');menu.innerHTML=`<div class="log-heading">战况速报</div><div class="bt-log" role="log">${logs||'野生妖怪出现了！'}</div>${ui}`;
-  menu.querySelectorAll('[data-solo-move]').forEach(el=>el.addEventListener('click',()=>{choice.index=+el.dataset.soloMove;v3SoloRender();$('#scr-battle').scrollTop=0;}));
+  menu.querySelectorAll('[data-solo-move]').forEach(el=>el.addEventListener('click',()=>{if(B.fx)return;choice.index=+el.dataset.soloMove;v3SoloRender();$('#scr-battle').scrollTop=0;}));
   menu.querySelectorAll('[data-solo-replace]').forEach(el=>el.addEventListener('click',()=>v3SoloCommand({kind:'replace',index:+el.dataset.soloReplace})));
   menu.querySelectorAll('[data-solo-switch]').forEach(el=>el.addEventListener('click',()=>v3SoloCommand({kind:'switch',index:+el.dataset.soloSwitch})));
   menu.querySelectorAll('[data-solo-item]').forEach(el=>el.addEventListener('click',()=>v3SoloCommand({kind:'item',item:el.dataset.soloItem})));
   const confirm=$('#solo-confirm');if(confirm)confirm.addEventListener('click',()=>{if(skill)v3SoloCommand({kind:'move',index:choice.index,target:skill.target==='foe'?'wild':skill.target==='ally'?'you':undefined});});
   const struggle=$('#solo-struggle');if(struggle)struggle.addEventListener('click',()=>v3SoloCommand({kind:'struggle'}));
-  const skip=$('#solo-skip');if(skip)skip.addEventListener('click',()=>{clearInterval(B.timer);endTutorial();});
-  const run=$('#solo-run');if(run)run.addEventListener('click',()=>{clearInterval(B.timer);finishBattle({kind:'run'});});
+  const skip=$('#solo-skip');if(skip)skip.addEventListener('click',()=>{clearInterval(B.timer);if(B.fxToken)B.fxToken.cancelled=true;endTutorial();});
+  const run=$('#solo-run');if(run)run.addEventListener('click',()=>{clearInterval(B.timer);if(B.fxToken)B.fxToken.cancelled=true;finishBattle({kind:'run'});});
   v3SoloClock();
 }

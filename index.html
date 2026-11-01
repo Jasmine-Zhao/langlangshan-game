@@ -431,8 +431,33 @@ img{display:block}
 @keyframes fxImpact{from{transform:translate(-50%,-50%) scale(.2);opacity:1}to{transform:translate(-50%,-50%) scale(2.4);opacity:0}}
 @keyframes fxName{0%,100%{opacity:0}20%,75%{opacity:1}}
 @keyframes fxNumber{from{transform:translate(-50%,-10%);opacity:0}25%{opacity:1}to{transform:translate(-50%,-100%);opacity:0}}
-@media(max-height:780px){.bt-arena{height:280px;min-height:280px}.duel-foes{top:48px}.duel-mine{bottom:8px}}
+@media(max-height:780px){.bt-arena{height:280px;min-height:280px}.duel-foes{top:48px}.duel-mine{bottom:8px}.v3fx-name{top:47%}}
 @media(prefers-reduced-motion:reduce){.battle-projectile,.battle-impact{animation:none;display:none}.battle-fx-name,.battle-fx-number{animation:none;opacity:1}}
+/* ===== v3 战斗特效层：出招 → 弹道 → 命中 → 伤害数字，顺序播放，不拦截操作 ===== */
+.dslot .bar.hp i{transition:width .45s ease}
+.v3fx-name{position:absolute;top:44%;left:50%;transform:translate(-50%,-50%);max-width:92%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:8;pointer-events:none;color:#fff4d2;font-weight:800;font-size:clamp(13px,3.6vw,19px);text-shadow:0 2px 5px #000,0 0 14px var(--fx-color);animation:v3fxName .55s both}
+.v3fx-bolt{position:absolute;left:var(--sx);top:var(--sy);width:20px;height:20px;border-radius:50%;z-index:8;pointer-events:none;background:radial-gradient(circle,#fffbe8 20%,var(--fx-color));box-shadow:0 0 9px 5px var(--fx-color),0 0 26px 10px var(--fx-color);animation:v3fxTravel .34s ease-in both}
+.v3fx-impact{position:absolute;left:var(--tx);top:var(--ty);width:46px;height:46px;z-index:8;pointer-events:none;border:3px solid var(--fx-color);border-radius:50%;box-shadow:0 0 18px var(--fx-color),inset 0 0 14px var(--fx-color);animation:v3fxImpact .38s both}
+.v3fx-num{position:absolute;left:var(--tx);top:var(--ty);z-index:8;pointer-events:none;font-size:clamp(20px,5vw,27px);font-weight:900;color:#ffe4a8;white-space:nowrap;text-shadow:0 2px 5px #000,0 0 12px var(--fx-color);animation:v3fxNumber .9s both}
+.v3fx-num.super{color:#ffd77a;font-size:clamp(24px,6vw,32px)}
+.v3fx-num.tag-super,.v3fx-num.tag-buff,.v3fx-num.tag-debuff,.v3fx-num.tag-miss{font-size:clamp(11px,3vw,13px);font-weight:700;letter-spacing:.08em}
+.v3fx-num.tag-miss{color:#d8cdb4}
+.v3fx-num.tag-buff{color:#8de6ad}
+.v3fx-num.tag-debuff{color:#d4a5ff}
+.v3fx-num.tag-super{color:#ffd77a}
+.v3fx-ko .dcard{filter:grayscale(1) brightness(.45)!important;animation:v3fxKO .74s ease-out!important}
+@keyframes v3fxKO{0%{filter:brightness(2.4) saturate(.4)}60%{transform:translateY(6px) rotate(3deg)}100%{filter:grayscale(1) brightness(.45)}}
+@keyframes v3fxName{0%{opacity:0;transform:translate(-50%,-50%) scale(1.25)}18%,80%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0}}
+@keyframes v3fxTravel{from{transform:translate(-50%,-50%) scale(.4);opacity:0}20%{opacity:1}to{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.2);opacity:1}}
+@keyframes v3fxImpact{from{transform:translate(-50%,-50%) scale(.25);opacity:1}to{transform:translate(-50%,-50%) scale(2.6);opacity:0}}
+@keyframes v3fxNumber{from{transform:translate(-50%,-6%);opacity:0}18%{opacity:1;transform:translate(-50%,-32%)}to{transform:translate(-50%,-120%);opacity:0}}
+@media(prefers-reduced-motion:reduce){
+  .v3fx-bolt,.v3fx-impact{display:none}
+  .v3fx-name{animation:none;opacity:1}
+  .v3fx-num{animation:none;opacity:1;transform:translate(-50%,-40%)}
+  .v3fx-ko .dcard{animation:none!important}
+  .dslot .bar.hp i{transition:none}
+}
 @media(min-width:850px){
   body.battle-layout #app{width:min(1000px,calc(100vw - 24px))}
   body.battle-layout #scr-battle.on{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,380px);overflow:hidden}
@@ -2832,6 +2857,7 @@ function renderNetBattle(view){
 </script>
 <script src="game-engine-v3.js"></script>
 <script src="game-arena-v3.js"></script>
+<script src="game-fx-v3.js"></script>
 <script src="game-arena-ui-v3.js"></script>
 <script src="game-solo-ui-v3.js"></script>
 </body>

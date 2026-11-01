@@ -28,7 +28,7 @@ print(f"已编码 {len(images)} 张卡图")
 s = open(IDX, encoding="utf-8").read()
 
 # 先内联脚本，再统一替换脚本和模板中的图片引用。
-for filename in ("wb-cloud.js", "game-rules-v3.js", "game-save-v3.js", "game-engine-v3.js", "game-arena-v3.js", "game-arena-ui-v3.js", "game-solo-ui-v3.js"):
+for filename in ("wb-cloud.js", "game-rules-v3.js", "game-save-v3.js", "game-engine-v3.js", "game-arena-v3.js", "game-fx-v3.js", "game-arena-ui-v3.js", "game-solo-ui-v3.js"):
     tag = f'<script src="{filename}"></script>'
     if tag not in s:
         continue
