@@ -10,7 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run rules and save tests
-        run: node tests/game-v3.test.cjs
+        run: |
+          node tests/game-v3.test.cjs
+          node tests/game-fx-queue.test.cjs
       - name: Rebuild single-file version
         run: python3 build_singlefile.py
       - name: Check generated file and whitespace

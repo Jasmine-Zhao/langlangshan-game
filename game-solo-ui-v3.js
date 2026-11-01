@@ -21,28 +21,32 @@ function v3StartSolo(stage,stageId,team){
 function v3SoloClock(){const el=$('#solo-clock');if(el&&B&&B.v3solo)el.textContent=B.tutorial?'入门试炼':`剩余 ${Math.max(0,Math.ceil((B.battle.clock.deadline-Date.now())/1000))} 秒`;}
 async function v3SoloAdvance(){
   if(!B||!B.v3solo||B.over)return;
-  const battle=B.battle,enemy=battle.players[1],self=battle.players[0];
-  let fxEvents=null,fxOver=false;
+  const session=B,battle=B.battle,enemy=battle.players[1],self=battle.players[0];
+  let fxEvents=null,fxBefore=null,fxOver=false;
   if(battle.phase==='replace'&&LanglangBattle.active(enemy).hp<=0){const i=enemy.team.findIndex(m=>m.hp>0);if(i>=0)LanglangBattle.replace(battle,enemy.id,i);}
   if(battle.phase==='select'&&LanglangBattle.active(enemy).hp>0&&!battle.commands[enemy.id])LanglangBattle.select(battle,enemy.id,LanglangBattle.defaultCommand(enemy));
   if(LanglangBattle.isReady(battle)){
-    const turn=battle.turn,events=LanglangBattle.resolve(battle);
-    B.history.push({turn,events});B.history=B.history.slice(-4);B.choice=null;
+    const turn=battle.turn,before=LanglangBattle.scene(battle),events=LanglangBattle.resolve(battle);
+    B.history.push({turn,before,events});B.history=B.history.slice(-4);B.choice=null;
     v3SyncSolo();
     if(battle.phase==='over')fxOver=true;
     else if(battle.phase==='replace'&&LanglangBattle.active(enemy).hp<=0){const i=enemy.team.findIndex(m=>m.hp>0);if(i>=0)LanglangBattle.replace(battle,enemy.id,i);}
-    if(events.length)fxEvents=events;
+    if(events.length){fxEvents=events;fxBefore=before;}
   }
   v3SoloRender();
   // 表演期间锁定输入，避免重渲染打断；战斗结束时先播完击倒再弹结算。
-  if(fxEvents)await v3SoloPlayFx(fxEvents);
-  if(fxOver)v3SoloFinish();
+  if(fxEvents)await v3SoloPlayFx(fxEvents,fxBefore);
+  if(B!==session||session.over)return;
+  if(fxOver)v3SoloFinish();else if(fxEvents)v3SoloRender();
 }
-async function v3SoloPlayFx(events){
+async function v3SoloPlayFx(events,before){
   const arena=$('#bt-arena');if(!arena||!B||!B.v3solo)return;
-  const token={cancelled:false};B.fxToken=token;B.fx=true;
-  try{await LanglangFX.play(arena,LanglangFX.plan(B.battle,events),{token});}catch(_){}
-  if(B&&B.fxToken===token){B.fx=false;B.fxToken=null;}
+  const session=B,started=Date.now(),token={cancelled:false};session.fxToken=token;session.fx=true;
+  try{await LanglangFX.play(arena,LanglangFX.plan(session.battle,events),{token,before});}catch(e){console.error('战斗特效播放失败',e);}
+  if(B===session&&session.fxToken===token){
+    if(!token.cancelled&&session.battle.phase!=='over')session.battle.clock.deadline+=Date.now()-started;
+    session.fx=false;session.fxToken=null;
+  }
 }
 function v3SyncSolo(){
   if(!B||!B.v3solo)return;

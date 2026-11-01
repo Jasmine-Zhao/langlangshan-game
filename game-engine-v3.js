@@ -8,11 +8,14 @@
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const living=m=>m&&m.hp>0;
   const stage=n=>n>=0?(2+n)/2:2/(2-n);
+  // 只记录展示所需的场上状态，避免特效从回合最终结果倒推血量。
+  function scene(b){return b.players.map(p=>{const m=active(p);return {id:p.id,num:m.num,name:m.name,type:m.type,level:m.level,hp:m.hp,maxHp:m.stats.hp};});}
+  function emit(b,event){b.events.push({...event,scene:scene(b)});}
   function healItem(b,p){
     const m=active(p);
     if(living(m)&&m.item==='heart'&&!m.itemUsed&&m.hp<=m.stats.hp/2){
       const healed=Math.min(m.stats.hp-m.hp,Math.max(1,Math.floor(m.stats.hp/4)));m.hp+=healed;m.itemUsed=true;
-      b.events.push({kind:'item',target:p.id,item:'heart',healed});
+      emit(b,{kind:'item',target:p.id,item:'heart',healed});
     }
   }
   function monster(card,level,competitive){
@@ -62,15 +65,16 @@
     for(const p of b.players)if(living(active(p))&&!b.commands[p.id])b.commands[p.id]=defaultCommand(p);
   }
   function isReady(b){return b.phase==='select'&&b.players.every(p=>!living(active(p))||!!b.commands[p.id]);}
-  function effect(b,actor,target,targetPlayer,key,rng){
+  function effect(b,actor,actorPlayer,target,targetPlayer,key,rng){
     if(!key||!living(target))return;
+    let blocked=false;
     if(key==='burnChance'||key==='poisonChance'||key==='accuracyChance'){
       if(rng()>=.3)return;
       key=key==='burnChance'?'burn':key==='poisonChance'?'poison':'accuracyDown';
     }
     if(key==='burn'||key==='poison'){
       target.status[key]=3;
-      if(target.item==='clarity'&&!target.itemUsed){delete target.status[key];target.itemUsed=true;b.events.push({kind:'item',target:target.name,targetId:targetPlayer?targetPlayer.id:null,item:'clarity'});}
+      if(target.item==='clarity'&&!target.itemUsed){delete target.status[key];target.itemUsed=true;blocked=true;emit(b,{kind:'item',target:target.name,targetId:targetPlayer?targetPlayer.id:null,item:'clarity'});}
     }
     else if(key==='shield')target.shield=1;
     else if(key==='heal')target.hp=Math.min(target.stats.hp,target.hp+Math.max(1,Math.floor(target.stats.hp*.3)));
@@ -79,7 +83,7 @@
       const changes={defUp:['def',1],atkUp:['atk',1],speedUp:['spd',1],evadeUp:['evade',1],atkDown:['atk',-1],speedDown:['spd',-1],accuracyDown:['accuracy',-1]};
       const c=changes[key];if(c){target.mod[c[0]]=clamp(target.mod[c[0]]+c[1],-3,3);target.modTurns[c[0]]=3;}
     }
-    b.events.push({kind:'effect',actor:actor.name,actorId:actor.id,target:target.name,targetId:targetPlayer?targetPlayer.id:null,effect:key});
+    emit(b,{kind:'effect',actor:actor.name,actorId:actorPlayer.id,target:target.name,targetId:targetPlayer?targetPlayer.id:null,effect:key,blocked});
   }
   function execute(b,p,cmd,rng){
     const actor=active(p);if(!living(actor))return;
@@ -97,39 +101,39 @@
     if(!targets.length)return;
     for(const q of targets){
       const t=active(q),hit=skill.category==='support'?100:clamp(skill.accuracy*stage(actor.mod.accuracy)/stage(t.mod.evade),25,100);
-      if(rng()*100>=hit){b.events.push({kind:'miss',actor:p.id,target:q.id,skill:skill.name});continue;}
+      if(rng()*100>=hit){emit(b,{kind:'miss',actor:p.id,target:q.id,skill:skill.name});continue;}
       if(skill.power){
         const effectiveness=R.effectiveness(skill.type,t.type);
         const modifier=effectiveness*(skill.type===actor.type?1.2:1)*(skill.target==='foes'&&targets.length>1?.75:1);
         let damage=Math.max(1,Math.floor((15+skill.power*actor.stats.atk*stage(actor.mod.atk)/(t.stats.def*stage(t.mod.def))*.5)*modifier*(.9+rng()*.1)));
         if(t.shield){damage=Math.max(1,Math.floor(damage*.5));t.shield=0;}
-        if(t.item==='guard'&&!t.itemUsed){damage=Math.max(1,Math.floor(damage*.75));t.itemUsed=true;b.events.push({kind:'item',target:q.id,item:'guard'});}
-        t.hp=Math.max(0,t.hp-damage);b.events.push({kind:'hit',actor:p.id,target:q.id,skill:skill.name,damage,effectiveness});
+        if(t.item==='guard'&&!t.itemUsed){damage=Math.max(1,Math.floor(damage*.75));t.itemUsed=true;emit(b,{kind:'item',target:q.id,item:'guard'});}
+        t.hp=Math.max(0,t.hp-damage);emit(b,{kind:'hit',actor:p.id,target:q.id,skill:skill.name,damage,effectiveness});
         healItem(b,q);
       }
-      effect(b,actor,t,q,skill.effect,rng);
+      effect(b,actor,p,t,q,skill.effect,rng);
     }
-    if(cmd.kind==='struggle'){actor.hp=Math.max(0,actor.hp-Math.max(1,Math.floor(actor.stats.hp*.1)));healItem(b,p);}
+    if(cmd.kind==='struggle'){const before=actor.hp;actor.hp=Math.max(0,actor.hp-Math.max(1,Math.floor(actor.stats.hp*.1)));emit(b,{kind:'recoil',player:p.id,damage:before-actor.hp});healItem(b,p);}
   }
   function resolve(b,rng=Math.random,now=Date.now()){
     if(!isReady(b)||Object.keys(b.clock.disconnected).length)throw Error('回合尚未准备完成');
     b.events=[];
-    for(const p of b.players){const c=b.commands[p.id];if(c&&c.kind==='switch'&&living(p.team[c.index])){p.active=c.index;b.events.push({kind:'switch',player:p.id,num:active(p).num});}}
+    for(const p of b.players){const c=b.commands[p.id];if(c&&c.kind==='switch'&&living(p.team[c.index])){p.active=c.index;emit(b,{kind:'switch',player:p.id,num:active(p).num});}}
     for(const p of b.players){const cmd=b.commands[p.id];if(!cmd||cmd.kind!=='item'||!living(active(p)))continue;
       const m=active(p);
-      if(cmd.item==='pie'){const healed=Math.min(m.stats.hp-m.hp,Math.max(1,Math.floor(m.stats.hp*.3)));m.hp+=healed;b.events.push({kind:'heal',player:p.id,healed});}
-      else if(cmd.item==='cleanse'){m.status={};b.events.push({kind:'cleanse',player:p.id});}
+      if(cmd.item==='pie'){const healed=Math.min(m.stats.hp-m.hp,Math.max(1,Math.floor(m.stats.hp*.3)));m.hp+=healed;emit(b,{kind:'heal',player:p.id,healed});}
+      else if(cmd.item==='cleanse'){m.status={};emit(b,{kind:'cleanse',player:p.id});}
       else{const foe=b.players.find(q=>q.side!==p.side&&living(active(q))),target=foe&&active(foe);
         if(target&&rng()<R.catchChance(target.hp,target.stats.hp,target.rarity)){
-          b.captured={num:target.num,level:target.level};b.events.push({kind:'catch',num:target.num});b.phase='over';b.winner=p.side;return b.events;
+          b.captured={num:target.num,level:target.level};emit(b,{kind:'catch',num:target.num});b.phase='over';b.winner=p.side;return b.events;
         }
-        b.events.push({kind:'catch_failed',num:target?.num});
+        emit(b,{kind:'catch_failed',num:target?.num});
       }
     }
     const order=b.players.filter(p=>b.commands[p.id]&&!['switch','item'].includes(b.commands[p.id].kind)).map(p=>({p,tie:rng(),speed:active(p).stats.spd*stage(active(p).mod.spd)*(active(p).item==='speed'?1.1:1)}));
     order.sort((a,c)=>c.speed-a.speed||c.tie-a.tie);
     for(const x of order)execute(b,x.p,b.commands[x.p.id],rng);
-    for(const p of b.players){const m=active(p);if(!living(m))continue;for(const key of ['poison','burn'])if(m.status[key]&&living(m)){const damage=Math.max(1,Math.floor(m.stats.hp*.05));m.hp=Math.max(0,m.hp-damage);m.status[key]--;if(!m.status[key])delete m.status[key];b.events.push({kind:'status',player:p.id,effect:key,damage});healItem(b,p);}}
+    for(const p of b.players){const m=active(p);if(!living(m))continue;for(const key of ['poison','burn'])if(m.status[key]&&living(m)){const damage=Math.max(1,Math.floor(m.stats.hp*.05));m.hp=Math.max(0,m.hp-damage);m.status[key]--;if(!m.status[key])delete m.status[key];emit(b,{kind:'status',player:p.id,effect:key,damage});healItem(b,p);}}
     for(const p of b.players){const m=active(p);m.shield=0;for(const key of Object.keys(m.modTurns)){if(--m.modTurns[key]<=0){m.mod[key]=0;delete m.modTurns[key];}}}
     const remaining=side=>b.players.some(p=>p.side===side&&p.team.some(living));
     if(!remaining(0)||!remaining(1)){b.phase='over';b.winner=remaining(0)?0:remaining(1)?1:null;return b.events;}
@@ -171,5 +175,5 @@
     }
     return 'waiting';
   }
-  return Object.freeze({createBattle,active,select,timeout,isReady,resolve,replace,defaultCommand,disconnect,reconnect,tick});
+  return Object.freeze({createBattle,active,scene,select,timeout,isReady,resolve,replace,defaultCommand,disconnect,reconnect,tick});
 });

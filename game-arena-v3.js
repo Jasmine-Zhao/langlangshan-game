@@ -25,8 +25,8 @@
     const b=arena.battle;
     aiChoose(arena,now);
     if(E.isReady(b)&&!Object.keys(b.clock.disconnected).length){
-      const turn=b.turn,events=E.resolve(b,rng,now);
-      arena.history.push({turn,events});arena.history=arena.history.slice(-20);
+      const turn=b.turn,before=E.scene(b),events=E.resolve(b,rng,now);
+      arena.history.push({turn,before,events});arena.history=arena.history.slice(-20);
       aiChoose(arena,now);
     }
     arena.revision++;

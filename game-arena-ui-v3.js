@@ -9,14 +9,14 @@ async function v3StartHost(){
       return {...card,selectedSkills:cfg.skills,item:cfg.item};
     })}));
     const arena=LanglangArena.create(players);
-    B={v3:true,online:true,arena,over:false};NET._v3choice=null;NET._v3ended=false;NET._v3view=null;NET._v3animTurn=null;
+    B={v3:true,online:true,arena,over:false};NET._v3choice=null;NET._v3ended=false;NET._v3view=null;v3ResetFx();
     scr('battle');LanglangArena.advance(arena);
     await Promise.all(LOBBY.players.filter(p=>!p.ai&&p.pid!==NET.pid).map(p=>sendTo(p.pid,{t:'v3start',side:p.side,code:NET.code})));
     v3Publish();NET._v3timer=setInterval(v3Tick,1000);
   }catch(e){toast('无法开始对战：'+e.message);}
 }
 function v3StartGuest(d){
-  NET.mySide=d.side;NET.code=d.code;NET._v3choice=null;NET._v3ended=false;NET._v3view=null;NET._v3animTurn=null;NET._v3pending=null;
+  NET.mySide=d.side;NET.code=d.code;NET._v3choice=null;NET._v3ended=false;NET._v3view=null;NET._v3pending=null;v3ResetFx();
   B={v3:true,online:true,netGuest:true,over:false};scr('battle');
   v3SaveGuestSession();
   $('#bt-arena').innerHTML='<div class="resolving">正在进入竞技对战…</div>';$('#bt-menu').innerHTML='';
@@ -44,7 +44,7 @@ function v3ResumeHost(){
   netInit(ok=>{if(!ok)return;
     const now=Date.now(),gap=Math.max(0,now-saved.ts);
     NET.code=saved.code;NET.pid=HOST_PID;NET.isHost=true;NET.peer={relay:true};NET.conns=[];NET._lastId=saved.cursor||0;NET._busy=false;NET._v3ended=false;NET._v3view=null;
-    LOBBY=saved.lobby;B={v3:true,online:true,arena:saved.arena,over:false};
+    LOBBY=saved.lobby;B={v3:true,online:true,arena:saved.arena,over:false};v3ResetFx();
     LOBBY.players.filter(p=>!p.ai&&p.pid!==HOST_PID).forEach(p=>hostConn(p.pid));
     if(gap>=60000){B.arena.battle.phase='over';B.arena.battle.winner=1-(LOBBY.players.find(p=>p.pid===HOST_PID)?.side||0);}
     else if(!Object.keys(B.arena.battle.clock.disconnected).length)B.arena.battle.clock.deadline+=gap;
@@ -73,7 +73,7 @@ function v3ResumeGuest(){
   netInit(ok=>{if(!ok)return;
     NET.code=old.code;NET.pid=old.pid;NET.isHost=false;NET.mySide=old.side;NET.peer={relay:true};NET.host={open:true,send:m=>relaySend('host',m)};
     NET.conns=[];NET._lastId=old.cursor||0;NET._busy=false;NET._v3view=null;NET._v3choice=null;NET._v3ended=false;
-    B={v3:true,online:true,netGuest:true,over:false};scr('battle');$('#bt-arena').innerHTML='<div class="resolving">正在恢复对战…</div>';$('#bt-menu').innerHTML='';
+    B={v3:true,online:true,netGuest:true,over:false};v3ResetFx();scr('battle');$('#bt-arena').innerHTML='<div class="resolving">正在恢复对战…</div>';$('#bt-menu').innerHTML='';
     relayLoop();relayHeartbeat();relaySend('host',{t:'v3resume',pid:NET.pid});
     NET._v3timer=setInterval(v3GuestTick,1000);
   });
@@ -127,10 +127,10 @@ function v3Finish(){
   if(NET._v3ended||!B||!B.arena)return;
   NET._v3ended=true;B.over=true;v3ClearHostSession();if(NET._v3timer)clearInterval(NET._v3timer);boardUnpublish(NET.code);
   const winner=B.arena.battle.winner;
-  for(const p of LOBBY.players)if(!p.ai&&p.pid!==NET.pid)sendTo(p.pid,{t:'v3end',winner,side:p.side});
-  const me=LOBBY.players.find(p=>p.pid===NET.pid);v3ShowResult(winner,me.side);
+  for(const p of LOBBY.players)if(!p.ai&&p.pid!==NET.pid)sendTo(p.pid,{t:'v3end',winner,side:p.side,view:LanglangArena.view(B.arena,p.pid)});
+  const me=LOBBY.players.find(p=>p.pid===NET.pid);v3AfterFx(()=>v3ShowResult(winner,me.side));
 }
-function v3EndGuest(d){if(NET._v3ended)return;NET._v3ended=true;v3ClearGuestSession();if(NET._v3timer)clearInterval(NET._v3timer);if(B)B.over=true;v3ShowResult(d.winner,d.side);}
+function v3EndGuest(d){if(NET._v3ended)return;if(d.view)v3Receive({view:d.view});NET._v3ended=true;v3ClearGuestSession();if(NET._v3timer)clearInterval(NET._v3timer);if(B)B.over=true;v3AfterFx(()=>v3ShowResult(d.winner,d.side));}
 function v3ShowResult(winner,side){
   const draw=winner===null,win=winner===side,reward=draw?80:win?150:40;
   $('#res-title').textContent=draw?'平局':win?'胜利！':'败北…';$('#res-title').className='res-t '+(win?'':'lose');
@@ -146,6 +146,32 @@ function v3EventText(event,b){
   if(event.kind==='status')return `${name(event.player)} 受到 ${event.effect==='burn'?'灼烧':'中毒'}伤害 ${event.damage}`;
   if(event.kind==='effect')return `${event.actor} 的技能效果生效`;
   return '';
+}
+function v3ResetFx(){
+  if(NET._v3fxState?.token)NET._v3fxState.token.cancelled=true;
+  NET._v3fxState={active:false,queue:[],lastTurn:null,token:null,result:null};
+}
+function v3AfterFx(result){
+  const state=NET._v3fxState;
+  if(state&&state.active)state.result=result;else result();
+}
+function v3QueueFx(view,arena){
+  const state=NET._v3fxState||(v3ResetFx(),NET._v3fxState),history=view.history||[];
+  const entries=state.lastTurn===null?history.slice(-1):history.filter(item=>item.turn>state.lastTurn);
+  for(const item of entries){state.queue.push({item,battle:view.battle});state.lastTurn=item.turn;}
+  if(state.active||!state.queue.length)return;
+  const session=B;state.active=true;
+  (async()=>{
+    while(state.queue.length&&NET._v3fxState===state&&B===session){
+      const {item,battle}=state.queue.shift(),token={cancelled:false};state.token=token;
+      try{await LanglangFX.play(arena,LanglangFX.plan(battle,item.events),{token,before:item.before});}
+      catch(e){console.error('战斗特效播放失败',e);}
+    }
+    if(NET._v3fxState!==state||B!==session)return;
+    state.active=false;state.token=null;
+    if(NET._v3view)v3Render(NET._v3view);
+    if(state.result){const result=state.result;state.result=null;result();}
+  })();
 }
 function v3Render(view){
   if(!view||!B||!B.v3)return;
@@ -165,17 +191,19 @@ function v3Render(view){
       <div class="bar hp ${hpBarCls(m.hp,m.stats.hp)}"><i style="width:${Math.max(0,m.hp/m.stats.hp*100)}%"></i></div>
       <div class="dsub">HP ${m.hp}/${m.stats.hp} · Lv${m.level}</div><div class="downer">${playerLabel(p)} · ${escapeHTML(p.name)} · ${escapeHTML(LanglangRules.ITEMS[m.item]?.name||'无道具')}${m.itemUsed?'（已触发）':''}</div>
       ${targetable?`<div class="target-label">${selected?'✓ 已选目标':'点击选择目标'}</div>`:''}</div></div>`;};
-  const arena=$('#bt-arena');arena.innerHTML=`<div class="bt-hud"><span class="vn">${me.side===0?'蓝方':'红方'} · 竞技对战</span><span class="tn">回合 ${b.turn}</span><span id="v3-clock"></span></div><div class="duel-row duel-foes">${foes.map(slot).join('')}</div><div class="duel-row duel-mine">${mine.map(slot).join('')}</div>`;
-  const last=view.history[view.history.length-1];
-  // 每次重渲染都会打断上一段表演；新回合的事件按顺序播放，不阻塞选招操作。
-  if(NET._v3fxToken)NET._v3fxToken.cancelled=true;
-  if(last&&NET._v3animTurn!==last.turn){
-    NET._v3animTurn=last.turn;
-    const token={cancelled:false};NET._v3fxToken=token;
-    try{LanglangFX.play(arena,LanglangFX.plan(b,last.events),{token});}catch(_){}
-  }
-  arena.querySelectorAll('[data-v3target]').forEach(el=>{
-    const choose=()=>{choice.target=el.dataset.v3target;v3Render(view);$('#scr-battle').scrollTop=0;};el.addEventListener('click',choose);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();choose();}});
+  const arena=$('#bt-arena');
+  // 只刷新操作区，保留正在播放的场地；新的回合进入队列，不截断此前的表演。
+  if(!NET._v3fxState?.active)arena.innerHTML=`<div class="bt-hud"><span class="vn">${me.side===0?'蓝方':'红方'} · 竞技对战</span><span class="tn">回合 ${b.turn}</span><span id="v3-clock"></span></div><div class="duel-row duel-foes">${foes.map(slot).join('')}</div><div class="duel-row duel-mine">${mine.map(slot).join('')}</div>`;
+  v3QueueFx(view,arena);
+  arena.querySelectorAll('[data-v3player]').forEach(el=>{
+    const p=b.players.find(x=>x.id===el.dataset.v3player),targetable=p&&canTarget&&eligible.includes(p)&&active(p).hp>0,selected=targetable&&choice.target===p.id;
+    el.classList.toggle('target-available',!!targetable);el.classList.toggle('target-selected',!!selected);
+    let label=el.querySelector('.target-label');
+    if(targetable){
+      el.dataset.v3target=p.id;el.setAttribute('role','button');el.setAttribute('tabindex','0');el.setAttribute('aria-pressed',String(!!selected));
+      if(!label){label=document.createElement('div');label.className='target-label';el.querySelector('.dinfo').appendChild(label);}label.textContent=selected?'✓ 已选目标':'点击选择目标';
+      const choose=()=>{choice.target=p.id;v3Render(view);$('#scr-battle').scrollTop=0;};el.onclick=choose;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();choose();}};
+    }else{delete el.dataset.v3target;el.removeAttribute('role');el.removeAttribute('tabindex');el.removeAttribute('aria-pressed');if(label)label.remove();el.onclick=null;el.onkeydown=null;}
   });
   const lines=view.history.slice(-2).flatMap(x=>x.events.map(e=>v3EventText(e,b)).filter(Boolean).map(t=>`<div>${escapeHTML(t)}</div>`));
   const status=b.players.map(p=>`${playerLabel(p)} ${b.commands[p.id]?'✓ 已选':active(p).hp<=0?'已倒下':'选择中'}`).join(' · ');

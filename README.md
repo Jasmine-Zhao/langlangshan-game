@@ -28,6 +28,7 @@ python3 -m http.server 8802
 
 ```bash
 node tests/game-v3.test.cjs
+node tests/game-fx-queue.test.cjs
 python3 build_singlefile.py
 ```
 
@@ -43,6 +44,6 @@ python3 build_singlefile.py
 - `game-solo-ui-v3.js`：单人巡山界面与战斗适配。
 - `game-save-v3.js`：本机存档与旧版迁移。
 - `wb-cloud.js`：原有云服务 SDK；联机依赖它与现有云端配置。
-- `tests/game-v3.test.cjs`：规则和存档测试。
+- `tests/game-v3.test.cjs` / `tests/game-fx-queue.test.cjs`：规则、存档及战斗特效队列测试。
 
 `index.html` 仍保留部分旧版战斗与房间兼容代码，后续清理时应同时维护单人、联机、引导和旧存档回归测试。

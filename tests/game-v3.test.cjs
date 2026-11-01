@@ -189,3 +189,42 @@ const FX=require('../game-fx-v3.js');
   assert.equal(FX.plan(fb,[]).length,0);
   assert.equal(FX.plan(fb).length,0,'事件缺失时应返回空计划');
 }
+
+// 展示快照应保留受击、回血和换人发生时的状态，而不是从回合最终血量倒推。
+{
+  const ps=teams();ps[0].cards[0].item='heart';
+  const battle=E.createBattle(ps,{now:0});
+  const original=battle.players[0].team[0];original.hp=Math.floor(original.stats.hp/2)+1;
+  const beforeScene=E.scene(battle);
+  assert(E.select(battle,'c',{kind:'move',index:0,target:'a'}));
+  E.timeout(battle);
+  const ev=E.resolve(battle,()=>.5,1000),hitIndex=ev.findIndex(e=>e.kind==='hit'&&e.target==='a'),healIndex=ev.findIndex(e=>e.kind==='item'&&e.item==='heart');
+  assert(hitIndex>=0&&healIndex>hitIndex);
+  const hp=(event,id)=>event.scene.find(p=>p.id===id).hp;
+  assert(hp(ev[hitIndex],'a')<beforeScene.find(p=>p.id==='a').hp,'受击快照应记录扣血');
+  assert.equal(hp(ev[healIndex],'a'),hp(ev[hitIndex],'a')+ev[healIndex].healed,'回血快照应反映实际回血');
+  const steps=FX.plan(battle,ev);
+  assert.equal(steps.find(s=>s.type==='item'&&s.item==='heart').scene.find(p=>p.id==='a').hp,hp(ev[healIndex],'a'));
+
+  const switchBattle=E.createBattle(teams(),{now:0});
+  const initial=E.scene(switchBattle).find(p=>p.id==='a').num;
+  assert(E.select(switchBattle,'a',{kind:'switch',index:1}));E.timeout(switchBattle);
+  const switchEvents=E.resolve(switchBattle,()=>.5,1000),switchEvent=switchEvents.find(e=>e.kind==='switch');
+  assert.notEqual(switchEvent.scene.find(p=>p.id==='a').num,initial,'换人事件快照应显示新妖怪');
+}
+{
+  const arena=A.create(teams(),0);
+  A.command(arena,'a',{kind:'move',index:0,target:'c'},1,()=>.5);
+  E.timeout(arena.battle);A.advance(arena,2,()=>.5);
+  assert.equal(arena.history[0].before.find(p=>p.id==='c').hp,arena.battle.players[2].team[0].stats.hp,'回合历史应保存播放前血量');
+}
+{
+  const ps=teams();ps[0].cards[0].item='clarity';
+  const battle=E.createBattle(ps,{now:0}),attacker=battle.players[2].team[0];
+  attacker.stats.spd=10000;attacker.skills[0]={name:'灼烧测试',category:'support',target:'foe',effect:'burn',pp:10};
+  assert(E.select(battle,'c',{kind:'move',index:0,target:'a'}));E.timeout(battle);
+  const ev=E.resolve(battle,()=>.5,1000),effect=ev.find(e=>e.kind==='effect'&&e.actorId==='c');
+  assert.equal(effect.blocked,true);assert.equal(battle.players[0].team[0].status.burn,undefined);
+  assert(FX.plan(battle,ev).some(s=>s.type==='item'&&s.item==='clarity'));
+  assert(!FX.plan(battle,ev).some(s=>s.type==='effect'&&s.effect==='burn'),'清心符解除异常后不应再展示灼烧生效');
+}

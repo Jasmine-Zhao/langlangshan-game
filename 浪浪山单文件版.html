@@ -3097,11 +3097,14 @@ function renderNetBattle(view){
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const living=m=>m&&m.hp>0;
   const stage=n=>n>=0?(2+n)/2:2/(2-n);
+  // 只记录展示所需的场上状态，避免特效从回合最终结果倒推血量。
+  function scene(b){return b.players.map(p=>{const m=active(p);return {id:p.id,num:m.num,name:m.name,type:m.type,level:m.level,hp:m.hp,maxHp:m.stats.hp};});}
+  function emit(b,event){b.events.push({...event,scene:scene(b)});}
   function healItem(b,p){
     const m=active(p);
     if(living(m)&&m.item==='heart'&&!m.itemUsed&&m.hp<=m.stats.hp/2){
       const healed=Math.min(m.stats.hp-m.hp,Math.max(1,Math.floor(m.stats.hp/4)));m.hp+=healed;m.itemUsed=true;
-      b.events.push({kind:'item',target:p.id,item:'heart',healed});
+      emit(b,{kind:'item',target:p.id,item:'heart',healed});
     }
   }
   function monster(card,level,competitive){
@@ -3151,15 +3154,16 @@ function renderNetBattle(view){
     for(const p of b.players)if(living(active(p))&&!b.commands[p.id])b.commands[p.id]=defaultCommand(p);
   }
   function isReady(b){return b.phase==='select'&&b.players.every(p=>!living(active(p))||!!b.commands[p.id]);}
-  function effect(b,actor,target,targetPlayer,key,rng){
+  function effect(b,actor,actorPlayer,target,targetPlayer,key,rng){
     if(!key||!living(target))return;
+    let blocked=false;
     if(key==='burnChance'||key==='poisonChance'||key==='accuracyChance'){
       if(rng()>=.3)return;
       key=key==='burnChance'?'burn':key==='poisonChance'?'poison':'accuracyDown';
     }
     if(key==='burn'||key==='poison'){
       target.status[key]=3;
-      if(target.item==='clarity'&&!target.itemUsed){delete target.status[key];target.itemUsed=true;b.events.push({kind:'item',target:target.name,targetId:targetPlayer?targetPlayer.id:null,item:'clarity'});}
+      if(target.item==='clarity'&&!target.itemUsed){delete target.status[key];target.itemUsed=true;blocked=true;emit(b,{kind:'item',target:target.name,targetId:targetPlayer?targetPlayer.id:null,item:'clarity'});}
     }
     else if(key==='shield')target.shield=1;
     else if(key==='heal')target.hp=Math.min(target.stats.hp,target.hp+Math.max(1,Math.floor(target.stats.hp*.3)));
@@ -3168,7 +3172,7 @@ function renderNetBattle(view){
       const changes={defUp:['def',1],atkUp:['atk',1],speedUp:['spd',1],evadeUp:['evade',1],atkDown:['atk',-1],speedDown:['spd',-1],accuracyDown:['accuracy',-1]};
       const c=changes[key];if(c){target.mod[c[0]]=clamp(target.mod[c[0]]+c[1],-3,3);target.modTurns[c[0]]=3;}
     }
-    b.events.push({kind:'effect',actor:actor.name,actorId:actor.id,target:target.name,targetId:targetPlayer?targetPlayer.id:null,effect:key});
+    emit(b,{kind:'effect',actor:actor.name,actorId:actorPlayer.id,target:target.name,targetId:targetPlayer?targetPlayer.id:null,effect:key,blocked});
   }
   function execute(b,p,cmd,rng){
     const actor=active(p);if(!living(actor))return;
@@ -3186,39 +3190,39 @@ function renderNetBattle(view){
     if(!targets.length)return;
     for(const q of targets){
       const t=active(q),hit=skill.category==='support'?100:clamp(skill.accuracy*stage(actor.mod.accuracy)/stage(t.mod.evade),25,100);
-      if(rng()*100>=hit){b.events.push({kind:'miss',actor:p.id,target:q.id,skill:skill.name});continue;}
+      if(rng()*100>=hit){emit(b,{kind:'miss',actor:p.id,target:q.id,skill:skill.name});continue;}
       if(skill.power){
         const effectiveness=R.effectiveness(skill.type,t.type);
         const modifier=effectiveness*(skill.type===actor.type?1.2:1)*(skill.target==='foes'&&targets.length>1?.75:1);
         let damage=Math.max(1,Math.floor((15+skill.power*actor.stats.atk*stage(actor.mod.atk)/(t.stats.def*stage(t.mod.def))*.5)*modifier*(.9+rng()*.1)));
         if(t.shield){damage=Math.max(1,Math.floor(damage*.5));t.shield=0;}
-        if(t.item==='guard'&&!t.itemUsed){damage=Math.max(1,Math.floor(damage*.75));t.itemUsed=true;b.events.push({kind:'item',target:q.id,item:'guard'});}
-        t.hp=Math.max(0,t.hp-damage);b.events.push({kind:'hit',actor:p.id,target:q.id,skill:skill.name,damage,effectiveness});
+        if(t.item==='guard'&&!t.itemUsed){damage=Math.max(1,Math.floor(damage*.75));t.itemUsed=true;emit(b,{kind:'item',target:q.id,item:'guard'});}
+        t.hp=Math.max(0,t.hp-damage);emit(b,{kind:'hit',actor:p.id,target:q.id,skill:skill.name,damage,effectiveness});
         healItem(b,q);
       }
-      effect(b,actor,t,q,skill.effect,rng);
+      effect(b,actor,p,t,q,skill.effect,rng);
     }
-    if(cmd.kind==='struggle'){actor.hp=Math.max(0,actor.hp-Math.max(1,Math.floor(actor.stats.hp*.1)));healItem(b,p);}
+    if(cmd.kind==='struggle'){const before=actor.hp;actor.hp=Math.max(0,actor.hp-Math.max(1,Math.floor(actor.stats.hp*.1)));emit(b,{kind:'recoil',player:p.id,damage:before-actor.hp});healItem(b,p);}
   }
   function resolve(b,rng=Math.random,now=Date.now()){
     if(!isReady(b)||Object.keys(b.clock.disconnected).length)throw Error('回合尚未准备完成');
     b.events=[];
-    for(const p of b.players){const c=b.commands[p.id];if(c&&c.kind==='switch'&&living(p.team[c.index])){p.active=c.index;b.events.push({kind:'switch',player:p.id,num:active(p).num});}}
+    for(const p of b.players){const c=b.commands[p.id];if(c&&c.kind==='switch'&&living(p.team[c.index])){p.active=c.index;emit(b,{kind:'switch',player:p.id,num:active(p).num});}}
     for(const p of b.players){const cmd=b.commands[p.id];if(!cmd||cmd.kind!=='item'||!living(active(p)))continue;
       const m=active(p);
-      if(cmd.item==='pie'){const healed=Math.min(m.stats.hp-m.hp,Math.max(1,Math.floor(m.stats.hp*.3)));m.hp+=healed;b.events.push({kind:'heal',player:p.id,healed});}
-      else if(cmd.item==='cleanse'){m.status={};b.events.push({kind:'cleanse',player:p.id});}
+      if(cmd.item==='pie'){const healed=Math.min(m.stats.hp-m.hp,Math.max(1,Math.floor(m.stats.hp*.3)));m.hp+=healed;emit(b,{kind:'heal',player:p.id,healed});}
+      else if(cmd.item==='cleanse'){m.status={};emit(b,{kind:'cleanse',player:p.id});}
       else{const foe=b.players.find(q=>q.side!==p.side&&living(active(q))),target=foe&&active(foe);
         if(target&&rng()<R.catchChance(target.hp,target.stats.hp,target.rarity)){
-          b.captured={num:target.num,level:target.level};b.events.push({kind:'catch',num:target.num});b.phase='over';b.winner=p.side;return b.events;
+          b.captured={num:target.num,level:target.level};emit(b,{kind:'catch',num:target.num});b.phase='over';b.winner=p.side;return b.events;
         }
-        b.events.push({kind:'catch_failed',num:target?.num});
+        emit(b,{kind:'catch_failed',num:target?.num});
       }
     }
     const order=b.players.filter(p=>b.commands[p.id]&&!['switch','item'].includes(b.commands[p.id].kind)).map(p=>({p,tie:rng(),speed:active(p).stats.spd*stage(active(p).mod.spd)*(active(p).item==='speed'?1.1:1)}));
     order.sort((a,c)=>c.speed-a.speed||c.tie-a.tie);
     for(const x of order)execute(b,x.p,b.commands[x.p.id],rng);
-    for(const p of b.players){const m=active(p);if(!living(m))continue;for(const key of ['poison','burn'])if(m.status[key]&&living(m)){const damage=Math.max(1,Math.floor(m.stats.hp*.05));m.hp=Math.max(0,m.hp-damage);m.status[key]--;if(!m.status[key])delete m.status[key];b.events.push({kind:'status',player:p.id,effect:key,damage});healItem(b,p);}}
+    for(const p of b.players){const m=active(p);if(!living(m))continue;for(const key of ['poison','burn'])if(m.status[key]&&living(m)){const damage=Math.max(1,Math.floor(m.stats.hp*.05));m.hp=Math.max(0,m.hp-damage);m.status[key]--;if(!m.status[key])delete m.status[key];emit(b,{kind:'status',player:p.id,effect:key,damage});healItem(b,p);}}
     for(const p of b.players){const m=active(p);m.shield=0;for(const key of Object.keys(m.modTurns)){if(--m.modTurns[key]<=0){m.mod[key]=0;delete m.modTurns[key];}}}
     const remaining=side=>b.players.some(p=>p.side===side&&p.team.some(living));
     if(!remaining(0)||!remaining(1)){b.phase='over';b.winner=remaining(0)?0:remaining(1)?1:null;return b.events;}
@@ -3260,7 +3264,7 @@ function renderNetBattle(view){
     }
     return 'waiting';
   }
-  return Object.freeze({createBattle,active,select,timeout,isReady,resolve,replace,defaultCommand,disconnect,reconnect,tick});
+  return Object.freeze({createBattle,active,scene,select,timeout,isReady,resolve,replace,defaultCommand,disconnect,reconnect,tick});
 });
 
 </script>
@@ -3292,8 +3296,8 @@ function renderNetBattle(view){
     const b=arena.battle;
     aiChoose(arena,now);
     if(E.isReady(b)&&!Object.keys(b.clock.disconnected).length){
-      const turn=b.turn,events=E.resolve(b,rng,now);
-      arena.history.push({turn,events});arena.history=arena.history.slice(-20);
+      const turn=b.turn,before=E.scene(b),events=E.resolve(b,rng,now);
+      arena.history.push({turn,before,events});arena.history=arena.history.slice(-20);
       aiChoose(arena,now);
     }
     arena.revision++;
@@ -3336,10 +3340,10 @@ function renderNetBattle(view){
 /* v3 战斗特效层：把引擎事件转成有先后顺序的表演。
    plan() 是纯函数，可在 Node 里测试；play() 只操作 #bt-arena 内的 DOM，不参与同步。 */
 (function (root, factory) {
-  const fx = factory();
+  const fx = factory(root);
   if (typeof module === 'object' && module.exports) module.exports = fx;
   else root.LanglangFX = fx;
-})(typeof globalThis === 'object' ? globalThis : this, function () {
+})(typeof globalThis === 'object' ? globalThis : this, function (root) {
   'use strict';
   const COLORS = {mountain:'#b8c96d', water:'#75d8f1', fire:'#f5a06a', cave:'#c08cff', none:'#f4cf7c'};
   const EFFECT_LABEL = {
@@ -3365,16 +3369,17 @@ function renderNetBattle(view){
     const pending = {};
     const list = Array.isArray(events) ? events : [];
     for (const e of list) {
+      const start = steps.length;
       if (e.kind === 'hit') {
         pending[e.target] = (pending[e.target] || 0) + e.damage;
         steps.push({type:'hit', actor:e.actor, target:e.target, skill:e.skill, damage:e.damage, superEffective:e.effectiveness > 1, color:COLORS[monsterType(battle, e.actor)] || COLORS.none});
       } else if (e.kind === 'miss') {
         steps.push({type:'miss', actor:e.actor, target:e.target, skill:e.skill, color:COLORS[monsterType(battle, e.actor)] || COLORS.none});
-      } else if (e.kind === 'effect') {
+      } else if (e.kind === 'effect' && !e.blocked) {
         steps.push({type:'effect', actor:e.actorId, target:targetIdOf(e), effect:e.effect, label:EFFECT_LABEL[e.effect] || '效果生效', buff:['defUp','atkUp','speedUp','evadeUp','shield','heal','cleanse'].includes(e.effect)});
-      } else if (e.kind === 'status') {
+      } else if (e.kind === 'status' || e.kind === 'recoil') {
         pending[e.player] = (pending[e.player] || 0) + e.damage;
-        steps.push({type:'status', target:e.player, effect:e.effect, damage:e.damage, label:e.effect === 'burn' ? '灼烧' : '中毒'});
+        steps.push({type:'status', target:e.player, effect:e.effect, damage:e.damage, label:e.kind === 'recoil' ? '反作用力' : e.effect === 'burn' ? '灼烧' : '中毒'});
       } else if (e.kind === 'switch') {
         steps.push({type:'switch', player:e.player, num:e.num});
       } else if (e.kind === 'heal') {
@@ -3385,6 +3390,12 @@ function renderNetBattle(view){
         steps.push({type:'item', target:targetIdOf(e), item:e.item, amount:e.healed || 0});
       } else if (e.kind === 'catch' || e.kind === 'catch_failed') {
         steps.push({type:e.kind, num:e.num});
+      }
+      if (steps.length > start && e.scene) {
+        const step = steps[steps.length - 1];
+        step.scene = e.scene;
+        const actor = e.scene.find(p => p.id === step.actor);
+        if (actor && (step.type === 'hit' || step.type === 'miss')) step.color = COLORS[actor.type] || COLORS.none;
       }
     }
     for (const step of steps) if (step.type === 'hit' || step.type === 'status') step.pending = pending[step.target] || 0;
@@ -3428,6 +3439,21 @@ function renderNetBattle(view){
     fill.style.width = Math.max(0, Math.min(100, ratio * 100)) + '%';
     if (!animated) { void fill.offsetWidth; fill.style.transition = ''; }
   }
+  function applyScene(arena, scene, animated) {
+    if (!Array.isArray(scene)) return;
+    for (const m of scene) {
+      const slot = slotEl(arena, m.id); if (!slot) continue;
+      const art = slot.querySelector('.dcard'), name = slot.querySelector('.dname'), sub = slot.querySelector('.dsub');
+      if (art) { const source = `${IMG[m.num]}`; if (art.getAttribute('src') !== source) art.setAttribute('src', source); }
+      if (name) name.textContent = m.name + ' · ' + (root.LanglangRules?.TYPES[m.type] || m.type);
+      if (sub) sub.textContent = `HP ${m.hp}/${m.maxHp} · Lv${m.level}`;
+      slot.dataset.v3hp = m.hp; slot.dataset.v3max = m.maxHp;
+      slot.classList.toggle('dead', m.hp <= 0);
+      const bar = slot.querySelector('.bar.hp');
+      if (bar) { bar.classList.toggle('low', m.hp <= 0 || m.hp / m.maxHp <= .25); bar.classList.toggle('mid', m.hp > 0 && m.hp / m.maxHp > .25 && m.hp / m.maxHp <= .55); }
+      setBar(slot, m.hp / m.maxHp, animated);
+    }
+  }
   function lunge(slot, dx, dy, reduced) {
     const card = slot.querySelector('.dcard');
     if (!card || reduced || !card.animate) return;
@@ -3461,6 +3487,7 @@ function renderNetBattle(view){
     const scale = reduced ? .55 : 1;
     const pending = {};
     for (const step of steps) if (step.pending !== undefined) pending[step.target] = step.pending;
+    applyScene(arena, opts.before, false);
     for (const step of steps) {
       if (token.cancelled) return;
       const speed = opts.speed || 1;
@@ -3498,7 +3525,8 @@ function renderNetBattle(view){
           setTimeout(() => impact.remove(), 420);
         }
         const maxHp = +target.dataset.v3max || 1, finalHp = +target.dataset.v3hp || 0;
-        if (step.pending !== undefined && pending[step.target]) {
+        if (step.scene) applyScene(arena, step.scene, true);
+        else if (step.pending !== undefined && pending[step.target]) {
           const before = (finalHp + pending[step.target]) / maxHp;
           setBar(target, before, false);
           requestAnimationFrame(() => setBar(target, Math.max(0, before - step.damage / maxHp), true));
@@ -3506,7 +3534,8 @@ function renderNetBattle(view){
         }
         floatText(arena, target, '−' + step.damage, step.superEffective ? 'super' : '', step.superEffective ? '#ffd77a' : step.color, -20);
         if (step.superEffective) floatText(arena, target, '克制！', 'tag-super', '#ffd77a', -4);
-        if (finalHp <= 0 && !pending[step.target]) {
+        const knockedOut = step.scene ? step.scene.some(m => m.id === step.target && m.hp <= 0) : finalHp <= 0 && !pending[step.target];
+        if (knockedOut) {
           await wait(320 * scale * speed); if (token.cancelled) return;
           target.classList.add('v3fx-ko');
           showName(arena, '倒下！', '#ff9d86');
@@ -3525,6 +3554,7 @@ function renderNetBattle(view){
       } else if (step.type === 'effect') {
         const target = slotEl(arena, step.target);
         if (!target) continue;
+        applyScene(arena, step.scene, true);
         showName(arena, step.label, step.buff ? '#8de6ad' : '#d4a5ff');
         floatText(arena, target, step.label, step.buff ? 'tag-buff' : 'tag-debuff', step.buff ? '#8de6ad' : '#d4a5ff', -12);
         tone(step.buff ? 660 : 240, .15, 0, 'sine', .05);
@@ -3534,7 +3564,8 @@ function renderNetBattle(view){
         if (!target) continue;
         floatText(arena, target, `${step.label} −${step.damage}`, 'tag-debuff', '#d4a5ff', -12);
         const maxHp = +target.dataset.v3max || 1, finalHp = +target.dataset.v3hp || 0;
-        if (pending[step.target]) {
+        if (step.scene) applyScene(arena, step.scene, true);
+        else if (pending[step.target]) {
           const before = (finalHp + pending[step.target]) / maxHp;
           setBar(target, before, false);
           requestAnimationFrame(() => setBar(target, Math.max(0, before - step.damage / maxHp), true));
@@ -3543,6 +3574,7 @@ function renderNetBattle(view){
         tone(200, .12, 0, 'sawtooth', .04);
         await wait(DUR.status * scale * speed);
       } else if (step.type === 'switch') {
+        applyScene(arena, step.scene, false);
         const slot = slotEl(arena, step.player);
         if (slot) {
           showName(arena, '派出了新妖怪', '#ffe09a');
@@ -3552,9 +3584,10 @@ function renderNetBattle(view){
         }
         await wait(DUR.switch * scale * speed);
       } else if (step.type === 'heal' || step.type === 'item' || step.type === 'cleanse') {
+        applyScene(arena, step.scene, true);
         const target = slotEl(arena, step.target);
         if (target) {
-          const text = step.type === 'cleanse' ? '异常解除' : '+' + (step.amount || '');
+          const text = step.type === 'cleanse' ? '异常解除' : step.amount ? '+' + step.amount : (root.LanglangRules?.ITEMS[step.item]?.name || '道具') + '生效';
           floatText(arena, target, text, 'tag-buff', '#8de6ad', -12);
           tone(720, .16, 0, 'sine', .05); tone(960, .2, .08, 'sine', .04);
         }
@@ -3583,14 +3616,14 @@ async function v3StartHost(){
       return {...card,selectedSkills:cfg.skills,item:cfg.item};
     })}));
     const arena=LanglangArena.create(players);
-    B={v3:true,online:true,arena,over:false};NET._v3choice=null;NET._v3ended=false;NET._v3view=null;NET._v3animTurn=null;
+    B={v3:true,online:true,arena,over:false};NET._v3choice=null;NET._v3ended=false;NET._v3view=null;v3ResetFx();
     scr('battle');LanglangArena.advance(arena);
     await Promise.all(LOBBY.players.filter(p=>!p.ai&&p.pid!==NET.pid).map(p=>sendTo(p.pid,{t:'v3start',side:p.side,code:NET.code})));
     v3Publish();NET._v3timer=setInterval(v3Tick,1000);
   }catch(e){toast('无法开始对战：'+e.message);}
 }
 function v3StartGuest(d){
-  NET.mySide=d.side;NET.code=d.code;NET._v3choice=null;NET._v3ended=false;NET._v3view=null;NET._v3animTurn=null;NET._v3pending=null;
+  NET.mySide=d.side;NET.code=d.code;NET._v3choice=null;NET._v3ended=false;NET._v3view=null;NET._v3pending=null;v3ResetFx();
   B={v3:true,online:true,netGuest:true,over:false};scr('battle');
   v3SaveGuestSession();
   $('#bt-arena').innerHTML='<div class="resolving">正在进入竞技对战…</div>';$('#bt-menu').innerHTML='';
@@ -3618,7 +3651,7 @@ function v3ResumeHost(){
   netInit(ok=>{if(!ok)return;
     const now=Date.now(),gap=Math.max(0,now-saved.ts);
     NET.code=saved.code;NET.pid=HOST_PID;NET.isHost=true;NET.peer={relay:true};NET.conns=[];NET._lastId=saved.cursor||0;NET._busy=false;NET._v3ended=false;NET._v3view=null;
-    LOBBY=saved.lobby;B={v3:true,online:true,arena:saved.arena,over:false};
+    LOBBY=saved.lobby;B={v3:true,online:true,arena:saved.arena,over:false};v3ResetFx();
     LOBBY.players.filter(p=>!p.ai&&p.pid!==HOST_PID).forEach(p=>hostConn(p.pid));
     if(gap>=60000){B.arena.battle.phase='over';B.arena.battle.winner=1-(LOBBY.players.find(p=>p.pid===HOST_PID)?.side||0);}
     else if(!Object.keys(B.arena.battle.clock.disconnected).length)B.arena.battle.clock.deadline+=gap;
@@ -3647,7 +3680,7 @@ function v3ResumeGuest(){
   netInit(ok=>{if(!ok)return;
     NET.code=old.code;NET.pid=old.pid;NET.isHost=false;NET.mySide=old.side;NET.peer={relay:true};NET.host={open:true,send:m=>relaySend('host',m)};
     NET.conns=[];NET._lastId=old.cursor||0;NET._busy=false;NET._v3view=null;NET._v3choice=null;NET._v3ended=false;
-    B={v3:true,online:true,netGuest:true,over:false};scr('battle');$('#bt-arena').innerHTML='<div class="resolving">正在恢复对战…</div>';$('#bt-menu').innerHTML='';
+    B={v3:true,online:true,netGuest:true,over:false};v3ResetFx();scr('battle');$('#bt-arena').innerHTML='<div class="resolving">正在恢复对战…</div>';$('#bt-menu').innerHTML='';
     relayLoop();relayHeartbeat();relaySend('host',{t:'v3resume',pid:NET.pid});
     NET._v3timer=setInterval(v3GuestTick,1000);
   });
@@ -3701,10 +3734,10 @@ function v3Finish(){
   if(NET._v3ended||!B||!B.arena)return;
   NET._v3ended=true;B.over=true;v3ClearHostSession();if(NET._v3timer)clearInterval(NET._v3timer);boardUnpublish(NET.code);
   const winner=B.arena.battle.winner;
-  for(const p of LOBBY.players)if(!p.ai&&p.pid!==NET.pid)sendTo(p.pid,{t:'v3end',winner,side:p.side});
-  const me=LOBBY.players.find(p=>p.pid===NET.pid);v3ShowResult(winner,me.side);
+  for(const p of LOBBY.players)if(!p.ai&&p.pid!==NET.pid)sendTo(p.pid,{t:'v3end',winner,side:p.side,view:LanglangArena.view(B.arena,p.pid)});
+  const me=LOBBY.players.find(p=>p.pid===NET.pid);v3AfterFx(()=>v3ShowResult(winner,me.side));
 }
-function v3EndGuest(d){if(NET._v3ended)return;NET._v3ended=true;v3ClearGuestSession();if(NET._v3timer)clearInterval(NET._v3timer);if(B)B.over=true;v3ShowResult(d.winner,d.side);}
+function v3EndGuest(d){if(NET._v3ended)return;if(d.view)v3Receive({view:d.view});NET._v3ended=true;v3ClearGuestSession();if(NET._v3timer)clearInterval(NET._v3timer);if(B)B.over=true;v3AfterFx(()=>v3ShowResult(d.winner,d.side));}
 function v3ShowResult(winner,side){
   const draw=winner===null,win=winner===side,reward=draw?80:win?150:40;
   $('#res-title').textContent=draw?'平局':win?'胜利！':'败北…';$('#res-title').className='res-t '+(win?'':'lose');
@@ -3720,6 +3753,32 @@ function v3EventText(event,b){
   if(event.kind==='status')return `${name(event.player)} 受到 ${event.effect==='burn'?'灼烧':'中毒'}伤害 ${event.damage}`;
   if(event.kind==='effect')return `${event.actor} 的技能效果生效`;
   return '';
+}
+function v3ResetFx(){
+  if(NET._v3fxState?.token)NET._v3fxState.token.cancelled=true;
+  NET._v3fxState={active:false,queue:[],lastTurn:null,token:null,result:null};
+}
+function v3AfterFx(result){
+  const state=NET._v3fxState;
+  if(state&&state.active)state.result=result;else result();
+}
+function v3QueueFx(view,arena){
+  const state=NET._v3fxState||(v3ResetFx(),NET._v3fxState),history=view.history||[];
+  const entries=state.lastTurn===null?history.slice(-1):history.filter(item=>item.turn>state.lastTurn);
+  for(const item of entries){state.queue.push({item,battle:view.battle});state.lastTurn=item.turn;}
+  if(state.active||!state.queue.length)return;
+  const session=B;state.active=true;
+  (async()=>{
+    while(state.queue.length&&NET._v3fxState===state&&B===session){
+      const {item,battle}=state.queue.shift(),token={cancelled:false};state.token=token;
+      try{await LanglangFX.play(arena,LanglangFX.plan(battle,item.events),{token,before:item.before});}
+      catch(e){console.error('战斗特效播放失败',e);}
+    }
+    if(NET._v3fxState!==state||B!==session)return;
+    state.active=false;state.token=null;
+    if(NET._v3view)v3Render(NET._v3view);
+    if(state.result){const result=state.result;state.result=null;result();}
+  })();
 }
 function v3Render(view){
   if(!view||!B||!B.v3)return;
@@ -3739,17 +3798,19 @@ function v3Render(view){
       <div class="bar hp ${hpBarCls(m.hp,m.stats.hp)}"><i style="width:${Math.max(0,m.hp/m.stats.hp*100)}%"></i></div>
       <div class="dsub">HP ${m.hp}/${m.stats.hp} · Lv${m.level}</div><div class="downer">${playerLabel(p)} · ${escapeHTML(p.name)} · ${escapeHTML(LanglangRules.ITEMS[m.item]?.name||'无道具')}${m.itemUsed?'（已触发）':''}</div>
       ${targetable?`<div class="target-label">${selected?'✓ 已选目标':'点击选择目标'}</div>`:''}</div></div>`;};
-  const arena=$('#bt-arena');arena.innerHTML=`<div class="bt-hud"><span class="vn">${me.side===0?'蓝方':'红方'} · 竞技对战</span><span class="tn">回合 ${b.turn}</span><span id="v3-clock"></span></div><div class="duel-row duel-foes">${foes.map(slot).join('')}</div><div class="duel-row duel-mine">${mine.map(slot).join('')}</div>`;
-  const last=view.history[view.history.length-1];
-  // 每次重渲染都会打断上一段表演；新回合的事件按顺序播放，不阻塞选招操作。
-  if(NET._v3fxToken)NET._v3fxToken.cancelled=true;
-  if(last&&NET._v3animTurn!==last.turn){
-    NET._v3animTurn=last.turn;
-    const token={cancelled:false};NET._v3fxToken=token;
-    try{LanglangFX.play(arena,LanglangFX.plan(b,last.events),{token});}catch(_){}
-  }
-  arena.querySelectorAll('[data-v3target]').forEach(el=>{
-    const choose=()=>{choice.target=el.dataset.v3target;v3Render(view);$('#scr-battle').scrollTop=0;};el.addEventListener('click',choose);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();choose();}});
+  const arena=$('#bt-arena');
+  // 只刷新操作区，保留正在播放的场地；新的回合进入队列，不截断此前的表演。
+  if(!NET._v3fxState?.active)arena.innerHTML=`<div class="bt-hud"><span class="vn">${me.side===0?'蓝方':'红方'} · 竞技对战</span><span class="tn">回合 ${b.turn}</span><span id="v3-clock"></span></div><div class="duel-row duel-foes">${foes.map(slot).join('')}</div><div class="duel-row duel-mine">${mine.map(slot).join('')}</div>`;
+  v3QueueFx(view,arena);
+  arena.querySelectorAll('[data-v3player]').forEach(el=>{
+    const p=b.players.find(x=>x.id===el.dataset.v3player),targetable=p&&canTarget&&eligible.includes(p)&&active(p).hp>0,selected=targetable&&choice.target===p.id;
+    el.classList.toggle('target-available',!!targetable);el.classList.toggle('target-selected',!!selected);
+    let label=el.querySelector('.target-label');
+    if(targetable){
+      el.dataset.v3target=p.id;el.setAttribute('role','button');el.setAttribute('tabindex','0');el.setAttribute('aria-pressed',String(!!selected));
+      if(!label){label=document.createElement('div');label.className='target-label';el.querySelector('.dinfo').appendChild(label);}label.textContent=selected?'✓ 已选目标':'点击选择目标';
+      const choose=()=>{choice.target=p.id;v3Render(view);$('#scr-battle').scrollTop=0;};el.onclick=choose;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();choose();}};
+    }else{delete el.dataset.v3target;el.removeAttribute('role');el.removeAttribute('tabindex');el.removeAttribute('aria-pressed');if(label)label.remove();el.onclick=null;el.onkeydown=null;}
   });
   const lines=view.history.slice(-2).flatMap(x=>x.events.map(e=>v3EventText(e,b)).filter(Boolean).map(t=>`<div>${escapeHTML(t)}</div>`));
   const status=b.players.map(p=>`${playerLabel(p)} ${b.commands[p.id]?'✓ 已选':active(p).hp<=0?'已倒下':'选择中'}`).join(' · ');
@@ -3820,28 +3881,32 @@ function v3StartSolo(stage,stageId,team){
 function v3SoloClock(){const el=$('#solo-clock');if(el&&B&&B.v3solo)el.textContent=B.tutorial?'入门试炼':`剩余 ${Math.max(0,Math.ceil((B.battle.clock.deadline-Date.now())/1000))} 秒`;}
 async function v3SoloAdvance(){
   if(!B||!B.v3solo||B.over)return;
-  const battle=B.battle,enemy=battle.players[1],self=battle.players[0];
-  let fxEvents=null,fxOver=false;
+  const session=B,battle=B.battle,enemy=battle.players[1],self=battle.players[0];
+  let fxEvents=null,fxBefore=null,fxOver=false;
   if(battle.phase==='replace'&&LanglangBattle.active(enemy).hp<=0){const i=enemy.team.findIndex(m=>m.hp>0);if(i>=0)LanglangBattle.replace(battle,enemy.id,i);}
   if(battle.phase==='select'&&LanglangBattle.active(enemy).hp>0&&!battle.commands[enemy.id])LanglangBattle.select(battle,enemy.id,LanglangBattle.defaultCommand(enemy));
   if(LanglangBattle.isReady(battle)){
-    const turn=battle.turn,events=LanglangBattle.resolve(battle);
-    B.history.push({turn,events});B.history=B.history.slice(-4);B.choice=null;
+    const turn=battle.turn,before=LanglangBattle.scene(battle),events=LanglangBattle.resolve(battle);
+    B.history.push({turn,before,events});B.history=B.history.slice(-4);B.choice=null;
     v3SyncSolo();
     if(battle.phase==='over')fxOver=true;
     else if(battle.phase==='replace'&&LanglangBattle.active(enemy).hp<=0){const i=enemy.team.findIndex(m=>m.hp>0);if(i>=0)LanglangBattle.replace(battle,enemy.id,i);}
-    if(events.length)fxEvents=events;
+    if(events.length){fxEvents=events;fxBefore=before;}
   }
   v3SoloRender();
   // 表演期间锁定输入，避免重渲染打断；战斗结束时先播完击倒再弹结算。
-  if(fxEvents)await v3SoloPlayFx(fxEvents);
-  if(fxOver)v3SoloFinish();
+  if(fxEvents)await v3SoloPlayFx(fxEvents,fxBefore);
+  if(B!==session||session.over)return;
+  if(fxOver)v3SoloFinish();else if(fxEvents)v3SoloRender();
 }
-async function v3SoloPlayFx(events){
+async function v3SoloPlayFx(events,before){
   const arena=$('#bt-arena');if(!arena||!B||!B.v3solo)return;
-  const token={cancelled:false};B.fxToken=token;B.fx=true;
-  try{await LanglangFX.play(arena,LanglangFX.plan(B.battle,events),{token});}catch(_){}
-  if(B&&B.fxToken===token){B.fx=false;B.fxToken=null;}
+  const session=B,started=Date.now(),token={cancelled:false};session.fxToken=token;session.fx=true;
+  try{await LanglangFX.play(arena,LanglangFX.plan(session.battle,events),{token,before});}catch(e){console.error('战斗特效播放失败',e);}
+  if(B===session&&session.fxToken===token){
+    if(!token.cancelled&&session.battle.phase!=='over')session.battle.clock.deadline+=Date.now()-started;
+    session.fx=false;session.fxToken=null;
+  }
 }
 function v3SyncSolo(){
   if(!B||!B.v3solo)return;
