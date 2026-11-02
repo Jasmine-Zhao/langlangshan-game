@@ -6,7 +6,7 @@ const vm=require('node:vm');
 async function main(){
   const playing=[];
   const ctx={
-    console,sessionStorage:{getItem:()=>null},G:null,NET:{_v3view:null},B:{v3:true},
+    console,sessionStorage:{getItem:()=>null},G:null,NET:{_v3view:null},B:{v3:true},sendTo:()=>{},
     LanglangFX:{plan:(_battle,events)=>events,play:(_arena,events,options)=>new Promise(resolve=>playing.push({events,options,resolve}))}
   };
   vm.runInNewContext(fs.readFileSync(require.resolve('../game-arena-ui-v3.js'),'utf8'),ctx);
@@ -36,6 +36,23 @@ async function main(){
   assert.equal(old.token.cancelled,true,'开始新对局时应取消旧对局的播放');
   playing[2].resolve();await new Promise(resolve=>setImmediate(resolve));
   assert.equal(ctx.NET._v3fxState.active,false);
+  // 结束时不等待旧回放，只播放最后击倒，跳过后只结算一次。
+  const buttons=[],arenaEl={},menuEl={appendChild:el=>buttons.push(el)};
+  ctx.setTimeout=setTimeout;ctx.clearTimeout=clearTimeout;
+  ctx.document={createElement:()=>({addEventListener(_name,fn){this.click=fn;}})};
+  ctx.$=sel=>sel==='#bt-arena'?arenaEl:menuEl;
+  ctx.v3Render=()=>{};
+  ctx.NET._v3view={battle:{},history:[{turn:3,before:[{id:'c',hp:20}],events:[
+    {kind:'hit',target:'c',scene:[{id:'c',hp:0}]},
+    {kind:'status',player:'a',scene:[{id:'a',hp:20}]}
+  ]}]};
+  ctx.B.over=true;let finalResults=0;
+  ctx.v3FinalFx(()=>finalResults++);
+  assert.equal(playing.at(-1).events.length,1);
+  assert.equal(playing.at(-1).events[0].kind,'hit','应展示最后的击倒，而非其后未致死的状态伤害');
+  buttons.at(-1).click();assert.equal(finalResults,1,'跳过应立即显示结果');
+  playing.at(-1).resolve();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(finalResults,1,'跳过后播放完成不能重复结算');
   console.log('v3 战斗特效队列检查通过');
 }
 main().catch(err=>{console.error(err);process.exitCode=1;});

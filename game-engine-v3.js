@@ -14,7 +14,7 @@
   function healItem(b,p){
     const m=active(p);
     if(living(m)&&m.item==='heart'&&!m.itemUsed&&m.hp<=m.stats.hp/2){
-      const healed=Math.min(m.stats.hp-m.hp,Math.max(1,Math.floor(m.stats.hp/4)));m.hp+=healed;m.itemUsed=true;
+      const healed=Math.min(m.stats.hp-m.hp,Math.max(1,Math.floor(m.stats.hp*.15)));m.hp+=healed;m.itemUsed=true;
       emit(b,{kind:'item',target:p.id,item:'heart',healed});
     }
   }
@@ -77,7 +77,7 @@
       if(target.item==='clarity'&&!target.itemUsed){delete target.status[key];target.itemUsed=true;blocked=true;emit(b,{kind:'item',target:target.name,targetId:targetPlayer?targetPlayer.id:null,item:'clarity'});}
     }
     else if(key==='shield')target.shield=1;
-    else if(key==='heal')target.hp=Math.min(target.stats.hp,target.hp+Math.max(1,Math.floor(target.stats.hp*.3)));
+    else if(key==='heal')target.hp=Math.min(target.stats.hp,target.hp+Math.max(1,Math.floor(target.stats.hp*.2)));
     else if(key==='cleanse')target.status={};
     else{
       const changes={defUp:['def',1],atkUp:['atk',1],speedUp:['spd',1],evadeUp:['evade',1],atkDown:['atk',-1],speedDown:['spd',-1],accuracyDown:['accuracy',-1]};
@@ -105,7 +105,9 @@
       if(skill.power){
         const effectiveness=R.effectiveness(skill.type,t.type);
         const modifier=effectiveness*(skill.type===actor.type?1.2:1)*(skill.target==='foes'&&targets.length>1?.75:1);
-        let damage=Math.max(1,Math.floor((15+skill.power*actor.stats.atk*stage(actor.mod.atk)/(t.stats.def*stage(t.mod.def))*.5)*modifier*(.9+rng()*.1)));
+        // 体力随等级增长；伤害也随攻击者等级增长，避免高等级战斗被拉长。
+        const levelScale=.9+.06*actor.level, teamScale=b.players.length===4?1.25:1;
+        let damage=Math.max(1,Math.floor((15+skill.power*actor.stats.atk*stage(actor.mod.atk)/(t.stats.def*stage(t.mod.def))*.5)*levelScale*teamScale*modifier*(.9+rng()*.1)));
         if(t.shield){damage=Math.max(1,Math.floor(damage*.5));t.shield=0;}
         if(t.item==='guard'&&!t.itemUsed){damage=Math.max(1,Math.floor(damage*.75));t.itemUsed=true;emit(b,{kind:'item',target:q.id,item:'guard'});}
         t.hp=Math.max(0,t.hp-damage);emit(b,{kind:'hit',actor:p.id,target:q.id,skill:skill.name,damage,effectiveness});
@@ -121,7 +123,7 @@
     for(const p of b.players){const c=b.commands[p.id];if(c&&c.kind==='switch'&&living(p.team[c.index])){p.active=c.index;emit(b,{kind:'switch',player:p.id,num:active(p).num});}}
     for(const p of b.players){const cmd=b.commands[p.id];if(!cmd||cmd.kind!=='item'||!living(active(p)))continue;
       const m=active(p);
-      if(cmd.item==='pie'){const healed=Math.min(m.stats.hp-m.hp,Math.max(1,Math.floor(m.stats.hp*.3)));m.hp+=healed;emit(b,{kind:'heal',player:p.id,healed});}
+      if(cmd.item==='pie'){const healed=Math.min(m.stats.hp-m.hp,Math.max(1,Math.floor(m.stats.hp*.2)));m.hp+=healed;emit(b,{kind:'heal',player:p.id,healed});}
       else if(cmd.item==='cleanse'){m.status={};emit(b,{kind:'cleanse',player:p.id});}
       else{const foe=b.players.find(q=>q.side!==p.side&&living(active(q))),target=foe&&active(foe);
         if(target&&rng()<R.catchChance(target.hp,target.stats.hp,target.rarity)){

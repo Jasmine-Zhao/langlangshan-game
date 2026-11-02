@@ -18,7 +18,7 @@ function v3StartSolo(stage,stageId,team){
     },1000);
   }catch(e){toast('无法开始巡山：'+e.message);}
 }
-function v3SoloClock(){const el=$('#solo-clock');if(el&&B&&B.v3solo)el.textContent=B.tutorial?'入门试炼':`剩余 ${Math.max(0,Math.ceil((B.battle.clock.deadline-Date.now())/1000))} 秒`;}
+function v3SoloClock(){const el=$('#solo-clock');if(el&&B&&B.v3solo)el.textContent=B.fx?'回合结算中':B.tutorial?'入门试炼':`剩余 ${Math.max(0,Math.ceil((B.battle.clock.deadline-Date.now())/1000))} 秒`;}
 async function v3SoloAdvance(){
   if(!B||!B.v3solo||B.over)return;
   const session=B,battle=B.battle,enemy=battle.players[1],self=battle.players[0];
@@ -33,11 +33,27 @@ async function v3SoloAdvance(){
     else if(battle.phase==='replace'&&LanglangBattle.active(enemy).hp<=0){const i=enemy.team.findIndex(m=>m.hp>0);if(i>=0)LanglangBattle.replace(battle,enemy.id,i);}
     if(events.length){fxEvents=events;fxBefore=before;}
   }
+  if(fxEvents)session.fx=true;
   v3SoloRender();
   // 表演期间锁定输入，避免重渲染打断；战斗结束时先播完击倒再弹结算。
-  if(fxEvents)await v3SoloPlayFx(fxEvents,fxBefore);
+  if(fxEvents){if(fxOver)await v3SoloFinalFx(fxEvents,fxBefore);else await v3SoloPlayFx(fxEvents,fxBefore);}
   if(B!==session||session.over)return;
   if(fxOver)v3SoloFinish();else if(fxEvents)v3SoloRender();
+}
+async function v3SoloFinalFx(events,before){
+  const session=B,arena=$('#bt-arena'),menu=$('#bt-menu'),i=v3FinalEventIndex(events);
+  if(!session||!arena)return;
+  if(i<0){await v3SoloPlayFx(events,before);return;}
+  const token={cancelled:false};session.fx=true;session.fxToken=token;
+  await new Promise(resolve=>{
+    let done=false;
+    const finish=()=>{if(done)return;done=true;token.cancelled=true;clearTimeout(timer);skip.remove();resolve();};
+    const timer=setTimeout(finish,4500),skip=document.createElement('button');
+    skip.className='btn btn-ghost';skip.textContent='跳过动画';skip.addEventListener('click',finish);menu.appendChild(skip);
+    const start=i>0&&events[i-1].scene?events[i-1].scene:before;
+    Promise.resolve(LanglangFX.play(arena,LanglangFX.plan(session.battle,[events[i]]),{token,before:start})).then(finish,finish);
+  });
+  if(B===session&&session.fxToken===token){session.fx=false;session.fxToken=null;}
 }
 async function v3SoloPlayFx(events,before){
   const arena=$('#bt-arena');if(!arena||!B||!B.v3solo)return;
@@ -89,35 +105,35 @@ function v3SoloRender(){
   if(!B.choice||B.choice.key!==key)B.choice={key,index:null};
   const choice=B.choice,skill=choice.index===null?null:m.skills[choice.index];
   const slot=(p,cls)=>{const x=LanglangBattle.active(p);return `<div class="dslot ${cls}" data-v3player="${p.id}" data-v3hp="${x.hp}" data-v3max="${x.stats.hp}"><img class="dcard" src="cards/${x.num}.jpg" alt=""><div class="dinfo"><div class="dname">${escapeHTML(x.name)} · ${LanglangRules.TYPES[x.type]}</div><div class="bar hp ${hpBarCls(x.hp,x.stats.hp)}"><i style="width:${x.hp/x.stats.hp*100}%"></i></div><div class="dsub">HP ${x.hp}/${x.stats.hp} · Lv${x.level}</div><div class="downer">${escapeHTML(p.name)}${Object.keys(x.status).length?' · '+Object.keys(x.status).map(k=>k==='burn'?'灼烧':'中毒').join('、'):''}</div></div></div>`;};
-  const arena=$('#bt-arena');arena.innerHTML=`<div class="bt-hud"><span class="vn">${escapeHTML(B.stage.name)}</span><span class="tn">回合 ${battle.turn}</span><span id="solo-clock"></span></div><div class="duel-row duel-foes">${slot(foe,'')}</div><div class="duel-row duel-mine">${slot(me,'me')}</div>`;
+  const arena=$('#bt-arena');arena.innerHTML=`<div class="bt-hud"><span class="vn">${escapeHTML(B.stage.name)}</span><span class="tn">${B.fx?'回合 '+B.history[B.history.length-1].turn+' 结算中':'回合 '+battle.turn}</span><span id="solo-clock"></span></div><div class="duel-row duel-foes">${slot(foe,'')}</div><div class="duel-row duel-mine">${slot(me,'me')}</div>`;
   const eventText=e=>{
     if(e.kind==='catch_failed')return '野生妖怪挣脱了葫芦，战斗继续。';
     if(e.kind==='heal')return `疗伤烧饼恢复 ${e.healed} 体力。`;
     if(e.kind==='cleanse')return '清心草解除了异常状态。';
     return v3EventText(e,battle);
   };
-  const logs=B.history.slice(-2).flatMap(x=>x.events.map(eventText).filter(Boolean)).map(t=>`<div>${escapeHTML(t)}</div>`).join('');
+  const logs=(B.fx?B.history.slice(0,-1):B.history).slice(-2).flatMap(x=>x.events.map(eventText).filter(Boolean)).map(t=>`<div>${escapeHTML(t)}</div>`).join('');
   let ui='';
-  if(battle.phase==='replace'){
+  if(B.fx)ui='<div class="rm-wait">回合结算中，请稍候…</div>';
+  else if(battle.phase==='replace'){
     const needs=m.hp<=0&&me.team.some(x=>x.hp>0);
-    ui=needs?`<div class="choice-panel">妖怪倒下了，请选择替补；超时自动选择。</div>${me.team.map((x,i)=>x.hp>0?`<button class="row" data-solo-replace="${i}">${escapeHTML(x.name)} · HP ${x.hp}/${x.stats.hp}</button>`:'').join('')}`:'<div class="rm-wait">等待替补上场…</div>';
+    ui=needs?`<div class="choice-panel">妖怪倒下了，请选择替补，不消耗下一回合行动；超时自动选择。${v3BenchCards(me.team,me.active,choice,true)}</div>`:'<div class="rm-wait">等待替补上场…</div>';
   }else{
     const target=skill?(skill.target==='self'||skill.target==='ally'?m.name:skill.target==='foes'?'对方全体':enemy.name):'';
     ui=`${B.tutorial?'<div class="choice-panel">选择技能并确认。削弱野生妖怪后，可用葫芦收服。<button class="btn btn-ghost" id="solo-skip">跳过引导</button></div>':''}
       <div class="choice-panel" aria-live="polite">${skill?`已选 <b>${escapeHTML(skill.name)}</b> · 目标 <b>${escapeHTML(target)}</b>`:'选择一个可用技能。'}<div class="choice-actions"><button class="btn btn-gold choice-confirm" id="solo-confirm" ${skill?'':'disabled'}>确认出招</button></div></div>
       <div class="skill-grid">${m.skills.map((s,i)=>`<button class="skill-card ${i===choice.index?'selected-skill':''}" data-solo-move="${i}" aria-pressed="${i===choice.index}" ${m.pp[i]<=0?'disabled':''}><span class="skill-info"><b>${escapeHTML(s.name)}</b><span class="skill-desc">${escapeHTML(s.description||'')}</span><span class="skill-cost">PP ${m.pp[i]}/${s.pp} · ${s.power?'威力 '+s.power:'辅助'}</span><span class="skill-availability">${m.pp[i]<=0?'次数耗尽':i===choice.index?'✓ 已选择':'可选择'}</span></span></button>`).join('')}</div>
       ${m.pp.every(x=>x<=0)?'<button class="btn btn-red" id="solo-struggle">奋力一击 · 消耗少量自身体力</button>':''}
-      <details class="choice-panel"><summary>替换妖怪 · 消耗本回合行动</summary>${me.team.map((x,i)=>i!==me.active&&x.hp>0?`<button class="row" data-solo-switch="${i}">${escapeHTML(x.name)} · HP ${x.hp}/${x.stats.hp}</button>`:'').join('')}</details>
-      <details class="choice-panel"><summary>使用道具 · 消耗本回合行动</summary>
+      <details class="choice-panel" id="bench-picker" ${choice.benchOpen?'open':''}><summary>替换妖怪 · 消耗本回合行动</summary>${v3BenchCards(me.team,me.active,choice,false)}</details>
+      <details class="choice-panel"><summary>使用道具 · 消耗本回合行动</summary><div class="solo-items">
       ${B.wild?`<button class="row" data-solo-item="gourd" ${!G.items.gourd?'disabled':''}>收妖葫芦 ×${G.items.gourd||0} · 体力越低越容易收服</button>`:''}
-      <button class="row" data-solo-item="pie" ${!G.items.pie?'disabled':''}>疗伤烧饼 ×${G.items.pie||0} · 恢复 30% 体力</button>
-      <button class="row" data-solo-item="cleanse" ${!G.items.cleanse?'disabled':''}>清心草 ×${G.items.cleanse||0} · 解除异常状态</button></details>
+      <button class="row" data-solo-item="pie" ${!G.items.pie?'disabled':''}>疗伤烧饼 ×${G.items.pie||0} · 恢复 20% 体力</button>
+      <button class="row" data-solo-item="cleanse" ${!G.items.cleanse?'disabled':''}>清心草 ×${G.items.cleanse||0} · 解除异常状态</button></div></details>
       ${B.wild?'<button class="btn btn-ghost" id="solo-run">离开巡山</button>':''}`;
   }
-  const menu=$('#bt-menu');menu.innerHTML=`<div class="log-heading">战况速报</div><div class="bt-log" role="log">${logs||'野生妖怪出现了！'}</div>${ui}`;
+  const menu=$('#bt-menu');menu.innerHTML=`<div class="log-heading">战况速报</div><div class="bt-log" role="log">${logs||(B.fx?'正在播放本回合…':'野生妖怪出现了！')}</div>${ui}`;
   menu.querySelectorAll('[data-solo-move]').forEach(el=>el.addEventListener('click',()=>{if(B.fx)return;choice.index=+el.dataset.soloMove;v3SoloRender();$('#scr-battle').scrollTop=0;}));
-  menu.querySelectorAll('[data-solo-replace]').forEach(el=>el.addEventListener('click',()=>v3SoloCommand({kind:'replace',index:+el.dataset.soloReplace})));
-  menu.querySelectorAll('[data-solo-switch]').forEach(el=>el.addEventListener('click',()=>v3SoloCommand({kind:'switch',index:+el.dataset.soloSwitch})));
+  v3BindBench(menu,choice,()=>v3SoloRender(),index=>v3SoloCommand({kind:battle.phase==='replace'?'replace':'switch',index}));
   menu.querySelectorAll('[data-solo-item]').forEach(el=>el.addEventListener('click',()=>v3SoloCommand({kind:'item',item:el.dataset.soloItem})));
   const confirm=$('#solo-confirm');if(confirm)confirm.addEventListener('click',()=>{if(skill)v3SoloCommand({kind:'move',index:choice.index,target:skill.target==='foe'?'wild':skill.target==='ally'?'you':undefined});});
   const struggle=$('#solo-struggle');if(struggle)struggle.addEventListener('click',()=>v3SoloCommand({kind:'struggle'}));

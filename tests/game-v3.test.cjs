@@ -96,6 +96,57 @@ walk=solo();walk.players[0].team[0].hp=10;assert(E.select(walk,'you',{kind:'item
 assert(E.resolve(walk,()=>.5,1000).some(e=>e.kind==='heal'));
 assert.equal(E.select(E.createBattle(teams()),'a',{kind:'item',item:'pie'}),false,'竞技不能使用消耗道具');
 
+// 同等级对战中，高等级的体力和伤害应大体同步增长。
+function mirrorHit(level){
+  const battle=E.createBattle([player('you',0,['001']),player('wild',1,['001'])],{competitive:false,level,now:0});
+  E.timeout(battle);
+  const hit=E.resolve(battle,()=>.5,1000).find(e=>e.kind==='hit');
+  return {damage:hit.damage,maxHp:battle.players[0].team[0].stats.hp};
+}
+const lowHit=mirrorHit(5),highHit=mirrorHit(30);
+assert(highHit.damage>lowHit.damage*2,'高等级伤害应随体力增长');
+assert(Math.abs(lowHit.damage/lowHit.maxHp-highHit.damage/highHit.maxHp)<.02,'同等级对战的攻击占体力比例不应随等级大幅降低');
+assert(highHit.damage/highHit.maxHp>.17&&highHit.damage/highHit.maxHp<.23,'普通攻击应能在数次命中后击倒对手');
+const fourPlayers=[player('a',0,['001']),player('b',0,['001']),player('c',1,['001']),player('d',1,['001'])];
+const fourBattle=E.createBattle(fourPlayers,{competitive:false,level:30,now:0});
+E.timeout(fourBattle);
+const fourHit=E.resolve(fourBattle,()=>.5,1000).find(e=>e.kind==='hit').damage;
+assert(Math.abs(fourHit-highHit.damage*1.25)<=1,'四人对战的直接伤害应增加 25%');
+for(const level of [5,30]){
+  const wildBattle=E.createBattle([player('you',0,['001']),player('wild',1,['001'])],{competitive:false,canCatch:true,allowItems:true,level,now:0});
+  const wild=wildBattle.players[1].team[0],initialChance=R.catchChance(wild.hp,wild.stats.hp,wild.rarity);
+  E.timeout(wildBattle);E.resolve(wildBattle,()=>.5,1000);
+  assert(wild.hp>0&&wild.hp<wild.stats.hp,'普通攻击后野生妖怪应仍有收服机会');
+  assert(R.catchChance(wild.hp,wild.stats.hp,wild.rarity)>initialChance,'削弱野生妖怪应提高收服概率');
+}
+
+// 巡山烧饼和恢复技能恢复最大体力的 20%；竞技护心果恢复 15%。
+walk=solo();walk.players[0].team[0].hp=1;
+assert(E.select(walk,'you',{kind:'item',item:'pie'}));E.timeout(walk);
+walkEvents=E.resolve(walk,()=>.5,1000);
+assert.equal(walkEvents.find(e=>e.kind==='heal').healed,Math.floor(walk.players[0].team[0].stats.hp*.2));
+const healBattle=E.createBattle([player('you',0,['030']),player('wild',1,['001'])],{competitive:false,level:30,now:0});
+const healer=healBattle.players[0].team[0];healer.hp=1;
+assert(E.select(healBattle,'you',{kind:'move',index:2,target:'you'}));E.timeout(healBattle);
+const healEvents=E.resolve(healBattle,()=>.5,1000);
+const healScene=healEvents.find(e=>e.kind==='effect'&&e.effect==='heal').scene.find(p=>p.id==='you');
+assert.equal(healScene.hp,1+Math.floor(healer.stats.hp*.2));
+const heartTeam=[player('a',0,['001','003','070']),player('b',1,['001','003','070'])];
+heartTeam[0].cards[0].item='heart';
+const heartBattle=E.createBattle(heartTeam,{now:0});heartBattle.players[0].team[0].hp=300;
+E.timeout(heartBattle);
+const heartEvent=E.resolve(heartBattle,()=>.5,1000).find(e=>e.kind==='item'&&e.item==='heart');
+assert.equal(heartEvent.healed,Math.floor(heartBattle.players[0].team[0].stats.hp*.15));
+
+// 自动对局校验节奏，实际时长仍取决于选招、动画和网络。
+for(const mode of [1,2]){
+  const testPlayers=(mode===1?[teams()[0],teams()[2]]:teams()).map(p=>({...p,ai:true}));
+  const match=A.create(testPlayers,0);let rounds=0;
+  while(match.battle.phase!=='over'&&rounds<30){A.advance(match,rounds*1000,()=>.5);rounds++;}
+  assert.equal(match.battle.phase,'over',`${mode}v${mode} 对局应在合理回合内结束`);
+  assert(rounds>=8&&rounds<=24,`${mode}v${mode} 的普通攻击对局回合数应处于试玩目标范围，实际 ${rounds}`);
+}
+
 const overlap=teams();overlap[1].cards[0]=card('003');
 assert.doesNotThrow(()=>E.createBattle(overlap),'不同队友可携带相同妖怪');
 const S=require('../game-save-v3.js');
@@ -143,10 +194,27 @@ assert.deepEqual(A.view(arena,'c').battle.commands.a,{submitted:true});
 assert.throws(()=>A.view(arena,'outsider'),/玩家不在/);
 assert.equal(A.command(arena,'c',{kind:'move',index:0,target:'a'},1000,()=>.5),true);
 assert.equal(arena.battle.turn,2);assert.equal(arena.history.length,1);
+assert(arena.playback,'回合结算后应等待真人播放完成');
+assert.equal(A.command(arena,'a',{kind:'move',index:0},1001,()=>.5),false,'播放期间不能提交下一回合');
+assert.equal(A.ackPlayback(arena,'a',1,2000),true);
+assert(arena.playback,'仍有玩家播放时不能开放操作');
+assert.equal(A.ackPlayback(arena,'c',1,3000),true);
+assert.equal(arena.playback,null);assert.equal(arena.battle.clock.deadline,63000,'所有人播放完成后才开始选招计时');
 assert.equal(A.disconnect(arena,'c',2000),true);
 assert.equal(A.tick(arena,61999,()=>.5),'paused');
 assert.equal(A.tick(arena,62000,()=>.5),'forfeit');
 assert.equal(arena.battle.winner,0);
+{
+  const competitors=teams();competitors[1].ai=true;competitors[3].ai=true;
+  const slow=A.create(competitors,0);
+  A.command(slow,'a',{kind:'move',index:0},100,()=>.5);A.command(slow,'c',{kind:'move',index:0},100,()=>.5);
+  assert.equal(A.tick(slow,15099,()=>.5),'playback');
+  A.tick(slow,15100,()=>.5);assert.equal(slow.playback,null);assert.equal(slow.battle.clock.deadline,75100,'播放等待超过上限后开放操作');
+  const gone=slow.battle.players.find(p=>p.id==='a');gone.team.forEach(m=>{m.hp=0;});
+  assert(A.leave(slow,'a',16000),'2v2 已出局玩家可退出');
+  assert(slow.left.includes('a'));assert.equal(slow.battle.phase,'select');
+  assert.equal(A.leave(slow,'c',16000),false,'仍有妖怪的玩家不能按出局退出');
+}
 // 自动对局应在有限回合内结束，且血量始终在合理范围内。
 for(let match=0;match<20;match++){
   arena=A.create(teams().map(p=>({...p,ai:true})),0);

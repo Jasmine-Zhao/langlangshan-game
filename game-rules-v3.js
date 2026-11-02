@@ -9,7 +9,7 @@
   const COUNTERS = Object.freeze({mountain:'water', water:'fire', fire:'mountain'});
   const PUBLIC = Object.freeze(['001','071','017','030','003','014','002','022']);
   const ITEMS = Object.freeze({
-    heart: Object.freeze({name:'护心果',description:'体力降至一半或以下时，恢复最大体力的四分之一；每场一次。'}),
+    heart: Object.freeze({name:'护心果',description:'体力降至一半或以下时，恢复最大体力的 15%；每场一次。'}),
     clarity: Object.freeze({name:'清心符',description:'首次陷入灼烧或中毒时自动解除；每场一次。'}),
     speed: Object.freeze({name:'轻身铃',description:'速度提升 10%。'}),
     guard: Object.freeze({name:'护身佩',description:'首次受到直接伤害减少 25%；每场一次。'})
@@ -46,7 +46,7 @@
     '047':[['蛛丝缠绕','control','foe',0,95,10,'speedDown'],['毒牙','attack','foe',65,95,15,'poisonChance'],['蛛网守护','support','ally',0,100,8,'shield'],['毒雾弥漫','attack','foes',55,90,8]],
     '072':[['鬼火一击','attack','foe',55,100,20],['精细照料','support','ally',0,100,8,'heal'],['小鬼扰敌','control','foe',0,95,10,'atkDown'],['机灵闪躲','support','self',0,100,10,'evadeUp']]
   };
-  const descriptions = Object.freeze({defUp:'提升自身防御',atkUp:'提升自身攻击',speedUp:'提升目标速度',evadeUp:'提升自身闪避',atkDown:'降低对手攻击',speedDown:'降低对手速度',accuracyDown:'降低对手命中',shield:'为目标提供保护',heal:'回复目标生命',cleanse:'解除目标异常状态',burnChance:'可能造成灼烧',poisonChance:'可能造成中毒',accuracyChance:'可能降低命中'});
+  const descriptions = Object.freeze({defUp:'提升自身防御',atkUp:'提升自身攻击',speedUp:'提升目标速度',evadeUp:'提升自身闪避',atkDown:'降低对手攻击',speedDown:'降低对手速度',accuracyDown:'降低对手命中',shield:'为目标提供保护',heal:'恢复目标最大体力的 20%',cleanse:'解除目标异常状态',burnChance:'可能造成灼烧',poisonChance:'可能造成中毒',accuracyChance:'可能降低命中'});
   function typeOf(card) {
     if (FIXED_TYPE[card.num]) return FIXED_TYPE[card.num];
     return card.fac === 'L' ? 'mountain' : card.fac === 'T' ? 'water' : 'cave';

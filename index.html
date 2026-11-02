@@ -481,6 +481,7 @@ select{max-width:100%;color:var(--paper);background:#2a2015;border:1px solid #80
 .choice-panel{border:1px solid #826d46;border-radius:10px;padding:8px 10px;background:#211a13;color:#dfd0ae;font-size:11px;line-height:1.6}
 .choice-panel b{color:#ffe09a}.choice-actions{display:flex;gap:8px;margin-top:6px}.choice-confirm{flex:1}.choice-confirm:disabled{opacity:.45;cursor:not-allowed}
 .guide-choice{padding:14px;line-height:1.8;color:#d7c7a6}.guide-choice .btn{width:100%;margin-top:10px}
+.bench-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:8px;margin:8px 0}.bench-card{min-height:145px;padding:8px;border:1px solid #806843;border-radius:10px;background:#211a13;color:var(--paper);text-align:center;font:inherit}.bench-card img{display:block;width:55px;height:75px;object-fit:cover;margin:0 auto 5px;border-radius:5px}.bench-card.selected{border-color:#ffe09a;box-shadow:0 0 0 2px #d9a441}.bench-card:disabled{opacity:.48}.bench-card .bar{margin:4px 0}.solo-items{display:grid;gap:8px;margin-top:8px}.solo-items button{min-height:48px;width:100%;padding:10px;text-align:left;font:inherit}
 </style>
 </head>
 <body>
@@ -492,11 +493,12 @@ select{max-width:100%;color:var(--paper);background:#2a2015;border:1px solid #80
     <div class="logo serif">浪浪山<br>妖怪合伙人</div>
     <div class="sub">山岭 · 水府 · 炎荒 · 幽洞</div>
     <div class="menu">
-      <button class="btn btn-gold" id="bt-new">开始新的冒险</button>
-      <button class="btn btn-red" id="bt-continue" style="display:none">继续冒险</button>
-      <button class="btn btn-ghost" id="bt-resume-arena" style="display:none">继续未结束的对战</button>
-      <button class="btn btn-ghost" id="bt-help1">🎓 玩法指南 · 边玩边学</button>
+      <button class="btn btn-gold" id="bt-new" disabled>正在加载…</button>
+      <button class="btn btn-red" id="bt-continue" style="display:none" disabled>继续冒险</button>
+      <button class="btn btn-ghost" id="bt-resume-arena" style="display:none" disabled>继续未结束的对战</button>
+      <button class="btn btn-ghost" id="bt-help1" disabled>🎓 玩法指南 · 边玩边学</button>
     </div>
+    <div id="loading-status" class="tip" role="status">正在准备游戏，请稍候…</div><button class="btn btn-ghost" id="loading-retry" style="display:none" onclick="location.reload()">重新加载</button>
     <div class="tip">进度自动保存在本机浏览器 · 下次打开可继续</div>
   </section>
 
@@ -567,7 +569,12 @@ select{max-width:100%;color:var(--paper);background:#2a2015;border:1px solid #80
   <div id="toast"></div>
 </div>
 
-<script src="wb-cloud.js"></script>
+<script>
+window._gameLoadFailed=false;
+window.addEventListener('error',function(e){if(!window._gameReady&&((e.target&&e.target.tagName==='SCRIPT'&&!/wb-cloud\.js/.test(e.target.src||''))||e.target===window)){window._gameLoadFailed=true;document.getElementById('loading-status').textContent='游戏加载失败，请检查网络后重试。';document.getElementById('loading-retry').style.display='';}},true);
+setTimeout(function(){if(!window._gameReady&&!window._gameLoadFailed)document.getElementById('loading-status').textContent='加载时间有点长，请继续等待；也可以重新加载。';if(!window._gameReady)document.getElementById('loading-retry').style.display='';},10000);
+</script>
+<script async src="wb-cloud.js"></script>
 <script src="game-rules-v3.js"></script>
 <script src="game-save-v3.js"></script>
 <script>
@@ -749,7 +756,7 @@ const STAGES=[
 ];
 const ITEMS={
   gourd:{name:"收妖葫芦",icon:"🏺",ds:"收服野生妖怪。对方体力越低，越容易成功。",price:120},
-  pie:{name:"疗伤烧饼",icon:"🥮",ds:"恢复一只妖怪 30% 体力。",price:80},
+  pie:{name:"疗伤烧饼",icon:"🥮",ds:"恢复一只妖怪 20% 体力。",price:80},
   cleanse:{name:"清心草",icon:"🌿",ds:"战斗中解除场上妖怪的异常状态。",price:60},
   puddin:{name:"还魂丹",icon:"🍡",ds:"在妖怪档案中复活一只倒下的妖怪，恢复一半体力。",price:150},
   ppFruit:{name:"回灵果",icon:"🍑",ds:"在妖怪档案中为选择的技能恢复 5 点 PP。",price:80}
@@ -832,6 +839,9 @@ function renderHub(){
   $("#coin-n").textContent=G.coin;
   $$(".hub-nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
   const body=$("#hub-body");
+  if(B&&B.v3&&B.left&&['map','vs'].includes(tab)){
+    body.innerHTML='<div class="choice-panel">你已离开对战并放弃奖励。作为房主，请保持本页面打开，直到队友的比赛结束；期间可以查看队伍和名册。</div>';return;
+  }
   if(tab==="map")renderMap(body);
   else if(tab==="team")renderTeam(body);
   else if(tab==="dex")renderDex(body);
@@ -1062,7 +1072,7 @@ function renderDetail(monId,viewNum){
   });
   $$('#detail-body [data-detail-use]').forEach(el=>el.addEventListener('click',()=>{
     if(!m)return;const item=el.dataset.detailUse;if(!G.items[item])return;
-    if(item==='pie'&&m.hp>0&&m.hp<st.hp)m.hp=Math.min(st.hp,m.hp+Math.max(1,Math.floor(st.hp*.3)));
+    if(item==='pie'&&m.hp>0&&m.hp<st.hp)m.hp=Math.min(st.hp,m.hp+Math.max(1,Math.floor(st.hp*.2)));
     else if(item==='puddin'&&m.hp<=0)m.hp=Math.max(1,Math.floor(st.hp*.5));else return;
     G.items[item]--;save();renderDetail(m.id);toast('道具使用成功');
   }));
@@ -2222,7 +2232,7 @@ function onGuestLeave(c){
   if(!LOBBY||B&&B.online&&B.over)return;
   const p=LOBBY.players.find(x=>x.pid===c.pid);
   if(!p)return;
-  if(B&&B.v3&&B.arena){v3Disconnect(c.pid);return;}
+  if(B&&B.v3&&B.arena){if(!(B.arena.left||[]).includes(c.pid))v3Disconnect(c.pid);return;}
   if(B&&B.online){ // 战斗中掉线：其妖怪交给 AI
     toast(p.name+" 掉线，AI 接管");
     ["p","e"].forEach(side=>{
@@ -2244,16 +2254,20 @@ function onGuestLeave(c){
 function onGuestMsg(c,d){
   if(!d||typeof d!=="object")return;
   if(d.t==="v3resume"&&B&&B.v3&&B.arena&&B.arena.battle.players.some(p=>p.id===c.pid)){v3Reconnect(c.pid);v3Publish();return;}
+  if(d.t==="v3fxdone"&&B&&B.v3){v3FxAck(c.pid,d.turn);return;}
+  if(d.t==="v3leave"&&B&&B.v3&&B.arena){if(LanglangArena.leave(B.arena,c.pid)){c.send({t:'v3left'});v3Publish();}return;}
   if(d.t==="v3cmd"&&B&&B.v3){v3Command(c.pid,d.cmd,d.turn,d.phase);return;}
   if(d.t==="hello"){
     c.pid=d.pid;
     if(!LOBBY)return;
     if(LOBBY.players.length>=(LOBBY.mode==="1v1"?2:4)){c.send({t:"full"});return;}
-    LOBBY.players.push({pid:d.pid,name:d.name||"旅人",side:LOBBY.players.filter(p=>!p.ai).length%2,ready:false,ai:false,pick:[],cards:d.cards||[]});
+    const cap=LOBBY.mode==='1v1'?1:2,side=[0,1].find(s=>LOBBY.players.filter(p=>p.side===s).length<cap);
+    if(side===undefined){c.send({t:'full'});return;}
+    LOBBY.players.push({pid:d.pid,name:d.name||"旅人",side,ready:false,ai:false,pick:[],cards:d.cards||[]});
     c.send({t:"lobby",lobby:lobbySnap()});
     pushLobby();
   }
-  else if(d.t==="side"){const p=LOBBY&&LOBBY.players.find(x=>x.pid===c.pid);if(p){p.side=p.side===0?1:0;pushLobby();}}
+  else if(d.t==="side"){const p=LOBBY&&LOBBY.players.find(x=>x.pid===c.pid);if(p){const side=1-p.side,cap=LOBBY.mode==='1v1'?1:2;if(LOBBY.players.filter(x=>x.side===side).length<cap)p.side=side;pushLobby();}}
   else if(d.t==="ready"){const p=LOBBY&&LOBBY.players.find(x=>x.pid===c.pid);if(p){p.ready=!!d.on;pushLobby();}}
   else if(d.t==="pick"){const p=LOBBY&&LOBBY.players.find(x=>x.pid===c.pid);if(p){p.pick=[...new Set((d.pick||[]).filter(n=>p.cards.some(cd=>cd.num===n)))].slice(0,3);p.ready=false;pushLobby();}}
   else if(d.t==="loadout"){const p=LOBBY&&LOBBY.players.find(x=>x.pid===c.pid);if(p&&d.num&&p.cards.some(cd=>cd.num===d.num)){
@@ -2268,6 +2282,7 @@ function onHostMsg(d){
   if(d.t==="v3start"){v3StartGuest(d);return;}
   if(d.t==="v3snap"){v3Receive(d);return;}
   if(d.t==="v3end"){v3EndGuest(d);return;}
+  if(d.t==="v3left"){v3LeaveAck();return;}
   if(d.t==="lobby"){if(B&&B.v3)return;LOBBY=d.lobby;tab="vs";if(document.querySelector(".scr.on").id==="scr-hub")renderHub();else{enterHub();}return;}
   if(d.t==="full"){toast("房间已满，无法加入（稍后再试或另建房间）");netCleanup();tab="vs";enterHub();renderHub();return;}
   if(d.t==="note"){toast(d.txt);return;}
@@ -2290,7 +2305,7 @@ function renderVs(body){
   if(!LOBBY&&!NET.peer){
     body.innerHTML=`<div class="vs-room">
       <div class="ptitle">在线对战 · 房间制</div>
-      <div class="netnote">房间与对战消息经云端中转，无需双方网络互通。创建房间生成 4 位数字码，好友输入即可进入；1v1 单挑，2v2 组队（3缺1 可由 AI 补位）。</div>
+      <div class="netnote">房间与对战消息经云端中转，无需双方网络互通。创建房间生成 4 位数字码，好友输入即可进入；1v1 和 2v2 空位均可由 AI 补位。</div>
       <div class="vs-input"><button class="btn btn-gold" id="bt-vs-host" style="flex:1">创建房间（房主）</button></div>
       <div class="vs-input"><input id="vs-code" inputmode="numeric" maxlength="4" placeholder="房主码">
       <button class="btn btn-red" id="bt-vs-join" style="flex:none">加入</button></div>
@@ -2328,14 +2343,14 @@ function renderVsPanel(body){
         const mine=p.pid===NET.pid;
         h+=`<div class="vs-slot filled">
           <div class="who"><b>${p.name}${mine?' <span class="vs-me">(我)</span>':""}${p.ai?" 🤖":""}</b>
-          <small>${mine?"已选 "+p.pick.length+"/3 · 不足自动补齐":isH&&p.pid!==NET.pid?"房主可点其名换边":""} · 可选 ${p.cards.length} 只</small></div>
+          <small>${mine?"已选 "+p.pick.length+"/3 · 不足自动补齐":isH&&p.pid!==NET.pid&&!p.ai?"房主可调整阵营":""} · 可选 ${p.cards.length} 只</small></div>
           <span class="vs-ready ${p.ready||p.ai?"on":""}">${p.ai?"AI 已备":p.ready?"已准备":"未准备"}</span>
           ${mine?`<button class="btn btn-ghost vs-act" data-swap="${p.pid}">换边</button>`:""}
-          ${isH&&!mine&&!p.ai?`<button class="btn btn-ghost vs-act" data-hswap="${p.pid}">移边</button>`:""}
+          ${isH&&!mine&&!p.ai?`<button class="btn btn-ghost vs-act" data-hswap="${p.pid}">移边</button>`:""}${isH&&p.ai?`<button class="btn btn-ghost vs-act" data-remove-ai="${p.pid}">移除 AI</button>`:""}
         </div>`;
       }else{
-        h+=`<div class="vs-slot"><div class="who"><b class="dimtx">空位</b><small>${LOBBY.mode==="2v2"?"可 AI 补位":"等待玩家加入"}</small></div>
-        ${LOBBY.mode==="2v2"&&isH?`<button class="btn btn-ghost vs-act" data-ai="${side}">AI 补位</button>`:""}</div>`;
+        h+=`<div class="vs-slot"><div class="who"><b class="dimtx">空位</b><small>可 AI 补位或等待玩家加入</small></div>
+        ${isH?`<button class="btn btn-ghost vs-act" data-ai="${side}">AI 补位</button>`:""}</div>`;
       }
     }
     return h;
@@ -2374,13 +2389,16 @@ function renderVsPanel(body){
     ${showDetail&&p.cards.length?`<div class="netnote" style="margin-top:6px">${p.cards.map(cd=>`${byNum(cd.num).name} Lv${cd.lvl} · HP${cd.hp} 攻${cd.atk} 防${cd.def} 速${cd.spd}`).join("<br>")}</div>`:""}
     </div>`;}).join("")}`;
   body.innerHTML=h;body.scrollTop=previousScroll;
-  $$("[data-swap]").forEach(b=>b.addEventListener("click",()=>{const p=LOBBY.players.find(x=>x.pid===b.dataset.swap);p.side=p.side===0?1:0;if(NET.isHost)pushLobby();else sendTo(null,{t:"side"});}));
-  $$("[data-hswap]").forEach(b=>b.addEventListener("click",()=>{const p=LOBBY.players.find(x=>x.pid===b.dataset.hswap);p.side=p.side===0?1:0;pushLobby();}));
+  function swapSide(p){const side=1-p.side,cap=LOBBY.mode==='1v1'?1:2;if(LOBBY.players.filter(x=>x.side===side).length>=cap){toast('该方席位已满');return false;}p.side=side;return true;}
+  $$("[data-swap]").forEach(b=>b.addEventListener("click",()=>{const p=LOBBY.players.find(x=>x.pid===b.dataset.swap);if(!swapSide(p))return;if(NET.isHost)pushLobby();else sendTo(null,{t:"side"});}));
+  $$("[data-hswap]").forEach(b=>b.addEventListener("click",()=>{const p=LOBBY.players.find(x=>x.pid===b.dataset.hswap);if(swapSide(p))pushLobby();}));
   $$("[data-ai]").forEach(b=>b.addEventListener("click",()=>{
     const side=+b.dataset.ai;
+    if(LOBBY.players.filter(p=>p.side===side).length>=(LOBBY.mode==='1v1'?1:2))return;
     LOBBY.players.push({pid:"ai"+side+"-"+Math.random().toString(36).slice(2,10),name:"AI·替补",side,ready:true,ai:true,pick:[],cards:[]});
     pushLobby();
   }));
+  $$("[data-remove-ai]").forEach(b=>b.addEventListener('click',()=>{LOBBY.players=LOBBY.players.filter(p=>!(p.ai&&p.pid===b.dataset.removeAi));pushLobby();}));
   $$("[data-pick]").forEach(b=>b.addEventListener("click",()=>{
     const me2=LOBBY.players.find(x=>x.pid===NET.pid);if(!me2)return;
     const num=b.dataset.pick;if(me2.ready){toast("请先取消准备再调整队伍");return;}
@@ -2403,7 +2421,7 @@ function renderVsPanel(body){
     const slot=+el.dataset.slot,value=+el.value,other=x.skills.indexOf(value),previous=x.skills[slot];
     if(other>=0&&other!==slot)x.skills[other]=previous;x.skills[slot]=value;
   })));
-  const bm=$("#bt-vs-mode");if(bm)bm.addEventListener("click",()=>{if(!NET.isHost){toast("只有房主能切换模式");return;}LOBBY.mode=LOBBY.mode==="1v1"?"2v2":"1v1";LOBBY.players.forEach(p=>{p.pick=[];});pushLobby();});
+  const bm=$("#bt-vs-mode");if(bm)bm.addEventListener("click",()=>{if(!NET.isHost){toast("只有房主能切换模式");return;}if(LOBBY.mode==='2v2'&&[0,1].some(side=>LOBBY.players.filter(p=>p.side===side).length>1)){toast('请先移除多余 AI 或调整玩家，再切换 1v1');return;}LOBBY.mode=LOBBY.mode==="1v1"?"2v2":"1v1";LOBBY.players.forEach(p=>{p.pick=[];});pushLobby();});
   const br=$("#bt-vs-ready");if(br)br.addEventListener("click",()=>{const me2=LOBBY.players.find(x=>x.pid===NET.pid);me2.ready=!me2.ready;if(NET.isHost)pushLobby();else sendTo(null,{t:"ready",on:me2.ready});});
   const bg=$("#bt-vs-go");if(bg)bg.addEventListener("click",()=>{
     if(!NET.isHost)return;
@@ -2860,5 +2878,10 @@ function renderNetBattle(view){
 <script src="game-fx-v3.js"></script>
 <script src="game-arena-ui-v3.js"></script>
 <script src="game-solo-ui-v3.js"></script>
+<script>
+if(!window._gameLoadFailed&&window.LanglangRules&&window.LanglangSave&&window.LanglangBattle&&window.LanglangArena&&window.LanglangFX&&typeof v3StartSolo==='function'&&typeof v3StartHost==='function'){
+  window._gameReady=true;['bt-new','bt-continue','bt-resume-arena','bt-help1'].forEach(id=>{document.getElementById(id).disabled=false;});document.getElementById('bt-new').textContent='开始新的冒险';document.getElementById('loading-status').style.display='none';document.getElementById('loading-retry').style.display='none';
+}else{document.getElementById('loading-status').textContent='游戏资源未能加载，请检查网络后重试。';document.getElementById('loading-retry').style.display='';}
+</script>
 </body>
 </html>
