@@ -70,6 +70,24 @@ assert(itemEvents.some(e=>e.kind==='item'&&e.item==='heart'));
 assert(itemEvents.some(e=>e.kind==='item'&&e.item==='guard'));
 assert(b.players[0].team[0].itemUsed&&b.players[2].team[0].itemUsed);
 assert.equal(E.createBattle(itemTeams,{now:0}).players[0].team[0].itemUsed,false);
+// 护身佩只减半首次直接伤害，后续攻击不受影响。
+const guardTeams=[player('a',0,['001','003','070']),player('b',1,['001','003','070'])];
+function guardHits(withGuard){
+  const players=JSON.parse(JSON.stringify(guardTeams));
+  if(withGuard)players[1].cards[0].item='guard';
+  const match=E.createBattle(players,{now:0}),hits=[],triggers=[];
+  for(let i=0;i<2;i++){
+    E.timeout(match);
+    const events=E.resolve(match,()=>.5,1000+i);
+    hits.push(events.find(e=>e.kind==='hit'&&e.target==='b').damage);
+    triggers.push(events.filter(e=>e.kind==='item'&&e.item==='guard').length);
+  }
+  return {hits,triggers};
+}
+const plainHits=guardHits(false),protectedHits=guardHits(true);
+assert.equal(protectedHits.hits[0],Math.floor(plainHits.hits[0]*.5));
+assert.equal(protectedHits.hits[1],plainHits.hits[1]);
+assert.deepEqual(protectedHits.triggers,[1,0]);
 itemTeams=teams();itemTeams[0].cards[0].item='bad';
 assert.throws(()=>E.createBattle(itemTeams),/未知竞技道具/);
 const drawCards=[{num:'a',rar:'R2'},{num:'b',rar:'R'},{num:'c',rar:'R'},{num:'d',rar:'S'}];
@@ -81,6 +99,9 @@ for(const rand of [()=>0,()=>.99]){
 assert.equal(R.catchChance(0,100,'R'),0);
 assert(R.catchChance(10,100,'R')>R.catchChance(80,100,'R'));
 assert(R.catchChance(10,100,'R')>R.catchChance(10,100,'U'));
+assert.equal(R.catchChance(20,100,'S'),.85*.55);
+assert.equal(R.catchChance(20,100,'U'),.85*.4);
+assert(R.catchChance(20,100,'R2')>R.catchChance(20,100,'S'));
 const roam=[{num:'046',fac:'G',rar:'R2'},{num:'003',fac:'G',rar:'U'},{num:'013',fac:'G',rar:'S'}];
 assert.equal(R.chooseEncounter(roam,'fire',0,()=>.99).num,'046');
 assert.equal(R.chooseEncounter(roam,'fire',10,()=>.999).num,'003');

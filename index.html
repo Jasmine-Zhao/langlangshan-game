@@ -414,6 +414,7 @@ img{display:block}
 .ultimate-cast{animation:violentShake .4s,castGlow .7s}@keyframes castGlow{50%{filter:brightness(1.8);box-shadow:0 0 45px #e8c581}}
 .ultimate-impact{animation:violentShake .45s;background:radial-gradient(ellipse,#ffd58d77,transparent 70%)}
 @media(max-height:780px){#scr-battle{overflow-y:auto;overflow-x:hidden}.bt-arena{flex:none;height:270px;min-height:270px}.bt-menu{flex:none}.mon.enemy .m-sprite{width:83px}.mon.player .m-sprite{width:94px}.mon.enemy{top:53px}.mon.player{bottom:5px}.m-card{padding:6px 7px;min-width:118px;max-width:138px}.m-card.expanded-hp{min-width:138px;max-width:150px}.bt-hud{top:5px}.bt-log{height:72px}.bt-menu{padding-bottom:8px;gap:5px}.skill-card{padding:6px;gap:5px}.skill-desc{display:none}.skill-icon{width:23px!important;height:26px!important;font-size:17px!important}.skill-grid{gap:5px}.burst-button{padding:6px 8px}.log-heading{font-size:9px}}
+@media(max-height:780px){.skill-grid-v3 .skill-desc{display:block}}
 @media(max-width:360px){.m-card{min-width:104px;max-width:118px}.m-card.expanded-hp{min-width:122px;max-width:130px}.skill-card{gap:4px}.skill-icon{width:21px!important}.skill-info b{font-size:10px}.bt-hud .vn{max-width:110px}}
 @media(prefers-reduced-motion:reduce){.burst-shake,.ultimate-cast,.ultimate-impact,.burst-ring,.burst-shard,.hp-surge,.unlock-card.lit{animation:none}.burst-flash{display:none}.burst-title{animation:none}.burst-button.ready{animation:none}}
 /* 对战表演：双方卡牌保留足够空间，特效只覆盖场地 */
@@ -476,6 +477,7 @@ select{max-width:100%;color:var(--paper);background:#2a2015;border:1px solid #80
 .skill-card.selected-skill{border-color:#ffe09a;box-shadow:0 0 0 2px #d9a441,0 0 18px #d9a44155;background:linear-gradient(145deg,#594024,#261c12)}
 .skill-card:focus-visible,.dslot[role="button"]:focus-visible,.choice-confirm:focus-visible{outline:3px solid #fff0b9;outline-offset:2px}
 .skill-availability{font-size:10px;color:#a9dba9}.skill-card.selected-skill .skill-availability{color:#ffe09a}.skill-card:disabled .skill-availability{color:#b5a398}
+body.battle-layout .skill-grid-v3 .skill-desc{font-size:12px;color:#e7d8bc}
 .dslot.target-available{cursor:pointer;border-color:#9cc5d5;box-shadow:0 0 0 1px #9cc5d566}.dslot.target-selected{border-color:#ffe09a;box-shadow:0 0 0 2px #f5ce76,0 0 18px #f5ce7655}
 .target-label{font-size:9px;color:#b9e8f4}.target-selected .target-label{color:#ffe09a}.m-sprite.target-selected{border-color:#ffe09a;box-shadow:0 0 0 3px #f5ce76,0 0 22px #f5ce7680}
 .choice-panel{border:1px solid #826d46;border-radius:10px;padding:8px 10px;background:#211a13;color:#dfd0ae;font-size:11px;line-height:1.6}

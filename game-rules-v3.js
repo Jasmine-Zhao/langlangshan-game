@@ -12,7 +12,7 @@
     heart: Object.freeze({name:'护心果',description:'体力降至一半或以下时，恢复最大体力的 15%；每场一次。'}),
     clarity: Object.freeze({name:'清心符',description:'首次陷入灼烧或中毒时自动解除；每场一次。'}),
     speed: Object.freeze({name:'轻身铃',description:'速度提升 10%。'}),
-    guard: Object.freeze({name:'护身佩',description:'首次受到直接伤害减少 25%；每场一次。'})
+    guard: Object.freeze({name:'护身佩',description:'首次受到直接伤害减少 50%；每场一次。'})
   });
   const FIXED_TYPE = Object.freeze({
     '001':'mountain','071':'mountain','070':'mountain','058':'mountain',
@@ -24,8 +24,8 @@
   const STATS = Object.freeze({
     '001':[580,110,130,80], '071':[510,145,110,135], '070':[480,145,105,170], '058':[560,130,130,80],
     '017':[520,145,105,130], '030':[570,105,145,80], '068':[530,115,110,145], '069':[560,110,140,90],
-    '003':[500,150,100,150], '013':[530,120,110,140], '014':[540,110,120,130], '019':[550,135,125,90],
-    '002':[520,135,105,140], '022':[540,105,120,135], '047':[530,120,125,125], '072':[520,100,125,155]
+    '003':[510,145,100,145], '013':[530,120,110,140], '014':[520,125,120,135], '019':[550,135,125,90],
+    '002':[530,130,105,135], '022':[525,120,120,135], '047':[530,120,125,125], '072':[520,100,125,155]
   });
   // 格式：名称、类型、目标、威力、命中、PP、附加效果。
   const moves = {
@@ -46,7 +46,7 @@
     '047':[['蛛丝缠绕','control','foe',0,95,10,'speedDown'],['毒牙','attack','foe',65,95,15,'poisonChance'],['蛛网守护','support','ally',0,100,8,'shield'],['毒雾弥漫','attack','foes',55,90,8]],
     '072':[['鬼火一击','attack','foe',55,100,20],['精细照料','support','ally',0,100,8,'heal'],['小鬼扰敌','control','foe',0,95,10,'atkDown'],['机灵闪躲','support','self',0,100,10,'evadeUp']]
   };
-  const descriptions = Object.freeze({defUp:'提升自身防御',atkUp:'提升自身攻击',speedUp:'提升目标速度',evadeUp:'提升自身闪避',atkDown:'降低对手攻击',speedDown:'降低对手速度',accuracyDown:'降低对手命中',shield:'为目标提供保护',heal:'恢复目标最大体力的 20%',cleanse:'解除目标异常状态',burnChance:'可能造成灼烧',poisonChance:'可能造成中毒',accuracyChance:'可能降低命中'});
+  const descriptions = Object.freeze({defUp:'提升自身防御，减少受到的伤害',atkUp:'提升自身攻击，增加造成的伤害',speedUp:'提升目标速度，更容易先出手',evadeUp:'提升自身闪避，更容易躲开攻击',atkDown:'降低对手攻击，减少其造成的伤害',speedDown:'降低对手速度，争取先出手',accuracyDown:'降低对手命中，更容易躲开攻击',shield:'本回合首次受到的直接伤害减半',heal:'恢复目标最大体力的 20%',cleanse:'解除目标的灼烧和中毒',burnChance:'攻击并有 30% 几率造成灼烧',poisonChance:'攻击并有 30% 几率造成中毒',accuracyChance:'攻击并有 30% 几率降低对手命中'});
   function typeOf(card) {
     if (FIXED_TYPE[card.num]) return FIXED_TYPE[card.num];
     return card.fac === 'L' ? 'mountain' : card.fac === 'T' ? 'water' : 'cave';
@@ -102,7 +102,7 @@
   function clampRandom(v){return Number.isFinite(v)?Math.max(0,Math.min(.999999999,v)):0;}
   function catchChance(hp,maxHp,rarity){
     if(!Number.isFinite(hp)||!Number.isFinite(maxHp)||hp<=0||maxHp<=0)return 0;
-    const base={R:.8,R2:.65,S:.45,U:.25}[rarity]||.5;
+    const base={R:.8,R2:.65,S:.55,U:.4}[rarity]||.5;
     return Math.max(.05,Math.min(.95,(1-Math.min(1,hp/maxHp)*.75)*base));
   }
   function chooseEncounter(cards,type,progress=0,rng=Math.random){

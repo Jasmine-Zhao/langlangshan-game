@@ -109,7 +109,7 @@
         const levelScale=.9+.06*actor.level, teamScale=b.players.length===4?1.25:1;
         let damage=Math.max(1,Math.floor((15+skill.power*actor.stats.atk*stage(actor.mod.atk)/(t.stats.def*stage(t.mod.def))*.5)*levelScale*teamScale*modifier*(.9+rng()*.1)));
         if(t.shield){damage=Math.max(1,Math.floor(damage*.5));t.shield=0;}
-        if(t.item==='guard'&&!t.itemUsed){damage=Math.max(1,Math.floor(damage*.75));t.itemUsed=true;emit(b,{kind:'item',target:q.id,item:'guard'});}
+        if(t.item==='guard'&&!t.itemUsed){damage=Math.max(1,Math.floor(damage*.5));t.itemUsed=true;emit(b,{kind:'item',target:q.id,item:'guard'});}
         t.hp=Math.max(0,t.hp-damage);emit(b,{kind:'hit',actor:p.id,target:q.id,skill:skill.name,damage,effectiveness});
         healItem(b,q);
       }
